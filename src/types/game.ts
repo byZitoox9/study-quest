@@ -9,6 +9,21 @@ export interface Book {
   sessionsCompleted: number;
 }
 
+export interface SessionRecord {
+  id: string;
+  bookId: string;
+  date: string; // ISO date string
+  focusRating?: number; // 0-5
+  durationMinutes: number;
+}
+
+export interface AppSettings {
+  notesEnabled: boolean;
+  focusRatingEnabled: boolean;
+  reduceAnimations: boolean;
+  theme: 'dark' | 'ocean' | 'forest' | 'sunset';
+}
+
 export interface PlayerStats {
   totalXP: number;
   currentLevelXP: number;
@@ -18,6 +33,9 @@ export interface PlayerStats {
   totalSessions: number;
   totalMinutes: number;
   books: Book[];
+  streak: number;
+  lastSessionDate: string | null;
+  sessionHistory: SessionRecord[];
 }
 
 export interface SessionReflection {
@@ -52,4 +70,22 @@ export const DEFAULT_BOOKS: Book[] = [
   { id: 'german', title: 'German Language', subject: 'german', icon: '🇩🇪', progress: 0, sessionsCompleted: 0 },
   { id: 'math', title: 'Mathematics', subject: 'math', icon: '📐', progress: 0, sessionsCompleted: 0 },
   { id: 'geography', title: 'World Geography', subject: 'geography', icon: '🌍', progress: 0, sessionsCompleted: 0 },
+];
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  notesEnabled: true,
+  focusRatingEnabled: true,
+  reduceAnimations: false,
+  theme: 'dark',
+};
+
+// Demo session history for heatmap
+export const DEMO_SESSION_HISTORY: SessionRecord[] = [
+  { id: '1', bookId: 'english', date: '2025-12-28', focusRating: 4, durationMinutes: 30 },
+  { id: '2', bookId: 'math', date: '2025-12-29', focusRating: 5, durationMinutes: 30 },
+  { id: '3', bookId: 'english', date: '2025-12-30', focusRating: 3, durationMinutes: 30 },
+  { id: '4', bookId: 'german', date: '2025-12-31', focusRating: 4, durationMinutes: 30 },
+  { id: '5', bookId: 'english', date: '2026-01-01', focusRating: 5, durationMinutes: 30 },
+  { id: '6', bookId: 'math', date: '2026-01-02', focusRating: 4, durationMinutes: 30 },
+  { id: '7', bookId: 'geography', date: '2026-01-03', focusRating: 4, durationMinutes: 30 },
 ];

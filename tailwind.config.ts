@@ -51,19 +51,24 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "xp-gold": "hsl(var(--xp-gold))",
         xp: {
           gold: "hsl(var(--xp-gold))",
           glow: "hsl(var(--xp-gold-glow))",
         },
+        "progress-green": "hsl(var(--progress-green))",
         progress: {
           green: "hsl(var(--progress-green))",
         },
+        "level-purple": "hsl(var(--level-purple))",
         level: {
           purple: "hsl(var(--level-purple))",
         },
+        "session-blue": "hsl(var(--session-blue))",
         session: {
           blue: "hsl(var(--session-blue))",
         },
+        "streak-orange": "hsl(var(--streak-orange))",
         reflection: {
           teal: "hsl(var(--reflection-teal))",
         },
