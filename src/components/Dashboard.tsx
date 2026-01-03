@@ -94,30 +94,6 @@ export const Dashboard = ({
         </div>
       )}
 
-      {/* Avatar Card */}
-      <div 
-        className="card-glow p-6 rounded-2xl text-center cursor-pointer hover:border-primary/50 transition-colors"
-        onClick={onViewEvolution}
-      >
-        <div className="text-7xl mb-4 hover:scale-110 transition-transform">
-          {currentLevelData?.emoji}
-        </div>
-        <h2 className="text-xl font-display font-bold text-foreground mb-1">
-          {currentLevelData?.name}
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">Level {stats.level}</p>
-        <span className="btn-secondary inline-block">
-          View Evolution Path →
-        </span>
-      </div>
-
-      {/* Weekly Goals */}
-      <WeeklyGoals 
-        goals={weeklyGoals} 
-        onGoalComplete={onGoalComplete}
-        reduceAnimations={reduceAnimations}
-      />
-
       {/* Actions */}
       <div className="space-y-3">
         <button
@@ -169,6 +145,30 @@ export const Dashboard = ({
           ⚙️ Settings
         </button>
       </div>
+
+      {/* Avatar Card */}
+      <div 
+        className="card-glow p-6 rounded-2xl text-center cursor-pointer hover:border-primary/50 transition-colors"
+        onClick={onViewEvolution}
+      >
+        <div className="text-7xl mb-4 hover:scale-110 transition-transform">
+          {currentLevelData?.emoji}
+        </div>
+        <h2 className="text-xl font-display font-bold text-foreground mb-1">
+          {currentLevelData?.name}
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">Level {stats.level}</p>
+        <span className="btn-secondary inline-block">
+          View Evolution Path →
+        </span>
+      </div>
+
+      {/* Weekly Goals */}
+      <WeeklyGoals 
+        goals={weeklyGoals} 
+        onGoalComplete={onGoalComplete}
+        reduceAnimations={reduceAnimations}
+      />
 
       {/* Demo Note */}
       <p className="text-xs text-center text-muted-foreground">
