@@ -69,8 +69,9 @@ export const Dashboard = ({
         </h2>
         <p className="text-sm text-muted-foreground mb-4">Level {stats.level}</p>
         <button
+          type="button"
           onClick={onViewEvolution}
-          className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+          className="btn-secondary mx-auto"
         >
           View Evolution Path →
         </button>
