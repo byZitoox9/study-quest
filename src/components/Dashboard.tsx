@@ -56,24 +56,7 @@ export const Dashboard = ({
         </div>
       )}
 
-      {/* Avatar Card */}
-      <div 
-        className="card-glow p-6 rounded-2xl text-center cursor-pointer hover:border-primary/50 transition-colors"
-        onClick={onViewEvolution}
-      >
-        <div className="text-7xl mb-4 hover:scale-110 transition-transform">
-          {currentLevelData?.emoji}
-        </div>
-        <h2 className="text-xl font-display font-bold text-foreground mb-1">
-          {currentLevelData?.name}
-        </h2>
-        <p className="text-sm text-muted-foreground mb-4">Level {stats.level}</p>
-        <span className="btn-secondary inline-block">
-          View Evolution Path →
-        </span>
-      </div>
-
-      {/* Quick Stats */}
+      {/* Quick Stats (Dashboard) */}
       <div className="grid grid-cols-3 gap-3">
         <div className="stat-card">
           <p className="text-2xl font-bold text-gradient-xp">{stats.totalSessions}</p>
@@ -88,13 +71,6 @@ export const Dashboard = ({
           <p className="text-xs text-muted-foreground">Books</p>
         </div>
       </div>
-
-      {/* Weekly Goals */}
-      <WeeklyGoals 
-        goals={weeklyGoals} 
-        onGoalComplete={onGoalComplete}
-        reduceAnimations={reduceAnimations}
-      />
 
       {/* Recent Book */}
       {recentBook && recentBook.sessionsCompleted > 0 && (
@@ -117,6 +93,30 @@ export const Dashboard = ({
           </div>
         </div>
       )}
+
+      {/* Avatar Card */}
+      <div 
+        className="card-glow p-6 rounded-2xl text-center cursor-pointer hover:border-primary/50 transition-colors"
+        onClick={onViewEvolution}
+      >
+        <div className="text-7xl mb-4 hover:scale-110 transition-transform">
+          {currentLevelData?.emoji}
+        </div>
+        <h2 className="text-xl font-display font-bold text-foreground mb-1">
+          {currentLevelData?.name}
+        </h2>
+        <p className="text-sm text-muted-foreground mb-4">Level {stats.level}</p>
+        <span className="btn-secondary inline-block">
+          View Evolution Path →
+        </span>
+      </div>
+
+      {/* Weekly Goals */}
+      <WeeklyGoals 
+        goals={weeklyGoals} 
+        onGoalComplete={onGoalComplete}
+        reduceAnimations={reduceAnimations}
+      />
 
       {/* Actions */}
       <div className="space-y-3">
