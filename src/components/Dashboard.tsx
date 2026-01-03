@@ -1,19 +1,31 @@
 import { AVATAR_LEVELS } from '@/types/game';
-import type { PlayerStats, Book } from '@/types/game';
+import type { PlayerStats } from '@/types/game';
 
 interface DashboardProps {
   stats: PlayerStats;
   onStartSession: () => void;
   onViewStats: () => void;
   onViewGallery: () => void;
+  onViewSettings: () => void;
+  onViewSocial: () => void;
 }
 
-export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery }: DashboardProps) => {
+export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery, onViewSettings, onViewSocial }: DashboardProps) => {
   const currentLevelData = AVATAR_LEVELS.find(l => l.level === stats.avatarLevel);
   const recentBook = stats.books.find(b => b.sessionsCompleted > 0) || stats.books[0];
 
   return (
     <div className="animate-fade-in">
+      {/* Streak Indicator */}
+      {stats.streak > 0 && (
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/20 border border-orange-500/30">
+            <span className="text-xl">🔥</span>
+            <span className="font-bold text-orange-400">{stats.streak} day streak</span>
+          </div>
+        </div>
+      )}
+
       {/* Avatar Card */}
       <div className="card-glow p-6 rounded-2xl mb-6 text-center">
         <div 
@@ -81,18 +93,33 @@ export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery }:
           📚 Start Focus Session
         </button>
         
-        <div className="flex gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <button
             onClick={onViewStats}
-            className="btn-secondary flex-1"
+            className="btn-secondary"
           >
             📊 Stats
           </button>
           <button
             onClick={onViewGallery}
-            className="btn-secondary flex-1"
+            className="btn-secondary"
           >
-            🎭 Gallery
+            🎭 Evolution
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={onViewSocial}
+            className="btn-secondary"
+          >
+            👥 Community
+          </button>
+          <button
+            onClick={onViewSettings}
+            className="btn-secondary"
+          >
+            ⚙️ Settings
           </button>
         </div>
       </div>

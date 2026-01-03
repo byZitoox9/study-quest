@@ -4,11 +4,14 @@ import { XPBar } from '@/components/XPBar';
 import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { BookSelection } from '@/components/BookSelection';
 import { FocusSession } from '@/components/FocusSession';
+import { FocusRating } from '@/components/FocusRating';
 import { ReflectionScreen } from '@/components/ReflectionScreen';
 import { AISynthesis } from '@/components/AISynthesis';
 import { LevelUpAnimation } from '@/components/LevelUpAnimation';
 import { StatsScreen } from '@/components/StatsScreen';
-import { AvatarGallery } from '@/components/AvatarGallery';
+import { EvolutionPath } from '@/components/EvolutionPath';
+import { SettingsScreen } from '@/components/SettingsScreen';
+import { SocialPreview } from '@/components/SocialPreview';
 import { WaitlistCTA } from '@/components/WaitlistCTA';
 import { Dashboard } from '@/components/Dashboard';
 import type { Book, SessionReflection } from '@/types/game';
@@ -18,10 +21,13 @@ type AppScreen =
   | 'dashboard'
   | 'book-selection' 
   | 'focus-session' 
+  | 'focus-rating'
   | 'reflection' 
   | 'ai-synthesis'
   | 'stats'
   | 'gallery'
+  | 'settings'
+  | 'social'
   | 'waitlist';
 
 const Index = () => {
@@ -29,9 +35,11 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [currentReflection, setCurrentReflection] = useState<SessionReflection | null>(null);
   const [sessionsThisVisit, setSessionsThisVisit] = useState(0);
+  const [pendingRating, setPendingRating] = useState<number | undefined>(undefined);
 
   const {
     stats,
+    settings,
     completeSession,
     completeReflection,
     completeSynthesis,
@@ -39,6 +47,7 @@ const Index = () => {
     showLevelUp,
     previousLevel,
     dismissLevelUp,
+    updateSettings,
   } = useGameState();
 
   const handleOnboardingComplete = () => {
@@ -58,10 +67,41 @@ const Index = () => {
   };
 
   const handleSessionComplete = () => {
+    if (settings.focusRatingEnabled) {
+      setScreen('focus-rating');
+    } else {
+      if (selectedBook) {
+        completeSession(selectedBook.id);
+      }
+      if (settings.notesEnabled) {
+        setScreen('reflection');
+      } else {
+        handleSessionEnd();
+      }
+    }
+  };
+
+  const handleFocusRating = (rating: number) => {
+    setPendingRating(rating);
+    if (selectedBook) {
+      completeSession(selectedBook.id, rating);
+    }
+    if (settings.notesEnabled) {
+      setScreen('reflection');
+    } else {
+      handleSessionEnd();
+    }
+  };
+
+  const handleFocusRatingSkip = () => {
     if (selectedBook) {
       completeSession(selectedBook.id);
     }
-    setScreen('reflection');
+    if (settings.notesEnabled) {
+      setScreen('reflection');
+    } else {
+      handleSessionEnd();
+    }
   };
 
   const handleReflectionComplete = (reflection: SessionReflection) => {
@@ -71,26 +111,21 @@ const Index = () => {
   };
 
   const handleReflectionSkip = () => {
-    setSessionsThisVisit(prev => prev + 1);
-    if (sessionsThisVisit >= 1) {
-      setScreen('waitlist');
-    } else {
-      setScreen('dashboard');
-    }
+    handleSessionEnd();
   };
 
   const handleSynthesisComplete = () => {
     completeSynthesis();
-    setSessionsThisVisit(prev => prev + 1);
-    if (sessionsThisVisit >= 1) {
-      setScreen('waitlist');
-    } else {
-      setScreen('dashboard');
-    }
+    handleSessionEnd();
   };
 
   const handleSynthesisSkip = () => {
+    handleSessionEnd();
+  };
+
+  const handleSessionEnd = () => {
     setSessionsThisVisit(prev => prev + 1);
+    setPendingRating(undefined);
     if (sessionsThisVisit >= 1) {
       setScreen('waitlist');
     } else {
@@ -109,10 +144,10 @@ const Index = () => {
   const showXPBar = screen !== 'onboarding';
 
   return (
-    <div className="min-h-screen">
+    <div className={`min-h-screen ${settings.reduceAnimations ? 'reduce-motion' : ''}`}>
       {showXPBar && <XPBar stats={stats} />}
       
-      {showLevelUp && (
+      {showLevelUp && !settings.reduceAnimations && (
         <LevelUpAnimation
           previousLevel={previousLevel}
           newLevel={stats.avatarLevel}
@@ -131,6 +166,8 @@ const Index = () => {
             onStartSession={handleStartSession}
             onViewStats={() => setScreen('stats')}
             onViewGallery={() => setScreen('gallery')}
+            onViewSettings={() => setScreen('settings')}
+            onViewSocial={() => setScreen('social')}
           />
         )}
 
@@ -150,6 +187,15 @@ const Index = () => {
             onComplete={handleSessionComplete}
             onCancel={handleSessionCancel}
           />
+        )}
+
+        {screen === 'focus-rating' && (
+          <div className="min-h-screen flex flex-col items-center justify-center px-4">
+            <FocusRating
+              onRate={handleFocusRating}
+              onSkip={handleFocusRatingSkip}
+            />
+          </div>
         )}
 
         {screen === 'reflection' && (
@@ -175,11 +221,23 @@ const Index = () => {
         )}
 
         {screen === 'gallery' && (
-          <AvatarGallery
+          <EvolutionPath
             currentLevel={stats.avatarLevel}
             totalXP={stats.totalXP}
             onClose={() => setScreen('dashboard')}
           />
+        )}
+
+        {screen === 'settings' && (
+          <SettingsScreen
+            settings={settings}
+            onUpdateSettings={updateSettings}
+            onClose={() => setScreen('dashboard')}
+          />
+        )}
+
+        {screen === 'social' && (
+          <SocialPreview onClose={() => setScreen('dashboard')} />
         )}
 
         {screen === 'waitlist' && (
