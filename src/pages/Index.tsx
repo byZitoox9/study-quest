@@ -14,6 +14,7 @@ import { SettingsScreen } from '@/components/SettingsScreen';
 import { SocialPreview } from '@/components/SocialPreview';
 import { WaitlistCTA } from '@/components/WaitlistCTA';
 import { Dashboard } from '@/components/Dashboard';
+import { MascotHelper } from '@/components/MascotHelper';
 import type { Book, SessionReflection } from '@/types/game';
 
 type AppScreen = 
@@ -25,7 +26,7 @@ type AppScreen =
   | 'reflection' 
   | 'ai-synthesis'
   | 'stats'
-  | 'gallery'
+  | 'evolution'
   | 'settings'
   | 'social'
   | 'waitlist';
@@ -40,6 +41,7 @@ const Index = () => {
   const {
     stats,
     settings,
+    weeklyGoals,
     completeSession,
     completeReflection,
     completeSynthesis,
@@ -48,6 +50,7 @@ const Index = () => {
     previousLevel,
     dismissLevelUp,
     updateSettings,
+    completeWeeklyGoal,
   } = useGameState();
 
   const handleOnboardingComplete = () => {
@@ -55,11 +58,8 @@ const Index = () => {
   };
 
   const handleStartSession = () => {
-    if (selectedBook) {
-      setScreen('focus-session');
-    } else {
-      setScreen('book-selection');
-    }
+    // Always go to book selection first
+    setScreen('book-selection');
   };
 
   const handleBookSelect = (book: Book) => {
@@ -138,10 +138,17 @@ const Index = () => {
   };
 
   const handleBookSelectionStart = () => {
-    setScreen('focus-session');
+    if (selectedBook) {
+      setScreen('focus-session');
+    }
+  };
+
+  const handleBookSelectionBack = () => {
+    setScreen('dashboard');
   };
 
   const showXPBar = screen !== 'onboarding';
+  const showMascotHelper = screen !== 'onboarding' && screen !== 'focus-session';
 
   return (
     <div className={`min-h-screen ${settings.reduceAnimations ? 'reduce-motion' : ''}`}>
@@ -155,6 +162,10 @@ const Index = () => {
         />
       )}
 
+      {showMascotHelper && (
+        <MascotHelper reduceAnimations={settings.reduceAnimations} />
+      )}
+
       <main className={`max-w-lg mx-auto px-4 ${showXPBar ? 'pt-24 pb-8' : ''}`}>
         {screen === 'onboarding' && (
           <OnboardingScreen onComplete={handleOnboardingComplete} />
@@ -163,11 +174,14 @@ const Index = () => {
         {screen === 'dashboard' && (
           <Dashboard
             stats={stats}
+            weeklyGoals={weeklyGoals}
             onStartSession={handleStartSession}
             onViewStats={() => setScreen('stats')}
-            onViewGallery={() => setScreen('gallery')}
+            onViewEvolution={() => setScreen('evolution')}
             onViewSettings={() => setScreen('settings')}
             onViewSocial={() => setScreen('social')}
+            onGoalComplete={completeWeeklyGoal}
+            reduceAnimations={settings.reduceAnimations}
           />
         )}
 
@@ -178,6 +192,7 @@ const Index = () => {
             onSelectBook={handleBookSelect}
             onAddCustomBook={addCustomBook}
             onStartSession={handleBookSelectionStart}
+            onBack={handleBookSelectionBack}
           />
         )}
 
@@ -220,7 +235,7 @@ const Index = () => {
           />
         )}
 
-        {screen === 'gallery' && (
+        {screen === 'evolution' && (
           <EvolutionPath
             currentLevel={stats.avatarLevel}
             totalXP={stats.totalXP}
