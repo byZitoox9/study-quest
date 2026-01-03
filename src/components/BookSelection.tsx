@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Book } from '@/types/game';
+import { XP_REWARDS } from '@/types/game';
 
 interface BookSelectionProps {
   books: Book[];
@@ -7,6 +8,7 @@ interface BookSelectionProps {
   onSelectBook: (book: Book) => void;
   onAddCustomBook: (title: string) => Book;
   onStartSession: () => void;
+  onBack?: () => void;
 }
 
 export const BookSelection = ({ 
@@ -14,7 +16,8 @@ export const BookSelection = ({
   selectedBook, 
   onSelectBook, 
   onAddCustomBook,
-  onStartSession 
+  onStartSession,
+  onBack
 }: BookSelectionProps) => {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customTitle, setCustomTitle] = useState('');
@@ -28,15 +31,30 @@ export const BookSelection = ({
     }
   };
 
+  const getBookLevel = (book: Book) => Math.floor(book.progress / 20) + 1;
+  
+  const estimatedXP = XP_REWARDS.sessionComplete + XP_REWARDS.reflection + XP_REWARDS.aiSynthesis;
+
   return (
     <div className="animate-fade-in">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-display font-bold text-foreground mb-2">
-          What are you studying today?
-        </h2>
-        <p className="text-muted-foreground">
-          Pick a book or add your own
-        </p>
+      {/* Header with back button */}
+      <div className="flex items-center gap-3 mb-6">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="text-muted-foreground hover:text-foreground text-lg"
+          >
+            ←
+          </button>
+        )}
+        <div>
+          <h2 className="text-2xl font-display font-bold text-foreground">
+            What are you studying today?
+          </h2>
+          <p className="text-muted-foreground">
+            Pick a book or add your own
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
@@ -56,7 +74,7 @@ export const BookSelection = ({
                 {book.progress > 0 && (
                   <div className="mt-2">
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="text-progress-green font-medium">Lv.{Math.floor(book.progress / 20) + 1}</span>
+                      <span className="text-progress-green font-medium">Lv.{getBookLevel(book)}</span>
                       <span className="text-muted-foreground">{book.progress}%</span>
                     </div>
                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
@@ -113,13 +131,34 @@ export const BookSelection = ({
         </div>
       )}
 
+      {/* Selected book details & session start */}
       {selectedBook && (
-        <button
-          onClick={onStartSession}
-          className="btn-primary w-full mt-6 text-lg py-4"
-        >
-          Start 30-Min Focus Session
-        </button>
+        <div className="mt-6 p-4 rounded-xl bg-card border border-primary/30 animate-fade-in">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-4xl">{selectedBook.icon}</span>
+            <div className="flex-1">
+              <h3 className="font-bold text-foreground">{selectedBook.title}</h3>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                <span>Level {getBookLevel(selectedBook)}</span>
+                <span>•</span>
+                <span>{selectedBook.progress}% mastery</span>
+              </div>
+            </div>
+          </div>
+
+          {/* XP Estimate */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-xp/10 border border-gradient-xp/20 mb-4">
+            <span className="text-sm text-muted-foreground">Estimated XP</span>
+            <span className="font-bold text-gradient-xp">+{estimatedXP} XP</span>
+          </div>
+
+          <button
+            onClick={onStartSession}
+            className="btn-primary w-full text-lg py-4"
+          >
+            🎯 Start 30-Min Focus Session
+          </button>
+        </div>
       )}
     </div>
   );

@@ -63,7 +63,24 @@ export const XP_REWARDS = {
   reflection: 15,
   aiSynthesis: 10,
   maxPerSession: 50,
+  weeklyGoalBonus: 30,
 };
+
+export interface WeeklyGoal {
+  id: string;
+  title: string;
+  description: string;
+  target: number;
+  current: number;
+  completed: boolean;
+  type: 'sessions' | 'books' | 'minutes';
+}
+
+export const DEFAULT_WEEKLY_GOALS: WeeklyGoal[] = [
+  { id: 'goal-1', title: 'Focus Champion', description: 'Complete 3 focus sessions', target: 3, current: 0, completed: false, type: 'sessions' },
+  { id: 'goal-2', title: 'Book Explorer', description: 'Study 2 different books', target: 2, current: 0, completed: false, type: 'books' },
+  { id: 'goal-3', title: 'Time Master', description: 'Study for 60 minutes total', target: 60, current: 0, completed: false, type: 'minutes' },
+];
 
 export const DEFAULT_BOOKS: Book[] = [
   { id: 'english', title: 'English Literature', subject: 'english', icon: '📚', progress: 0, sessionsCompleted: 0 },

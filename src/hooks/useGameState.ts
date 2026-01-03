@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { PlayerStats, Book, AvatarLevel, AppSettings, SessionRecord, AVATAR_LEVELS, XP_REWARDS, DEFAULT_BOOKS, DEFAULT_SETTINGS, DEMO_SESSION_HISTORY } from '@/types/game';
+import { PlayerStats, Book, AvatarLevel, AppSettings, SessionRecord, WeeklyGoal, AVATAR_LEVELS, XP_REWARDS, DEFAULT_BOOKS, DEFAULT_SETTINGS, DEFAULT_WEEKLY_GOALS, DEMO_SESSION_HISTORY } from '@/types/game';
 
 const getAvatarLevel = (totalXP: number): AvatarLevel => {
   for (let i = AVATAR_LEVELS.length - 1; i >= 0; i--) {
@@ -44,12 +44,19 @@ const DEMO_INITIAL_STATS: PlayerStats = {
   sessionHistory: DEMO_SESSION_HISTORY,
 };
 
+// Demo weekly goals with some progress
+const DEMO_INITIAL_GOALS: WeeklyGoal[] = DEFAULT_WEEKLY_GOALS.map(goal => ({
+  ...goal,
+  current: goal.type === 'sessions' ? 2 : goal.type === 'books' ? 1 : 30,
+}));
+
 export const useGameState = () => {
   const [stats, setStats] = useState<PlayerStats>(DEMO_INITIAL_STATS);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>(DEMO_INITIAL_GOALS);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [previousLevel, setPreviousLevel] = useState<AvatarLevel>('toddler');
-  const [pendingFocusRating, setPendingFocusRating] = useState<string | null>(null); // bookId
+  const [pendingFocusRating, setPendingFocusRating] = useState<string | null>(null);
 
   const addXP = useCallback((amount: number) => {
     setStats(prev => {
@@ -74,6 +81,40 @@ export const useGameState = () => {
     });
   }, []);
 
+  const updateWeeklyGoals = useCallback((bookId: string) => {
+    setWeeklyGoals(prev => {
+      const studiedBooksSet = new Set(
+        stats.sessionHistory.map(s => s.bookId)
+      );
+      studiedBooksSet.add(bookId);
+
+      return prev.map(goal => {
+        if (goal.completed) return goal;
+
+        let newCurrent = goal.current;
+        
+        if (goal.type === 'sessions') {
+          newCurrent = goal.current + 1;
+        } else if (goal.type === 'books') {
+          newCurrent = studiedBooksSet.size;
+        } else if (goal.type === 'minutes') {
+          newCurrent = goal.current + 30;
+        }
+
+        return { ...goal, current: newCurrent };
+      });
+    });
+  }, [stats.sessionHistory]);
+
+  const completeWeeklyGoal = useCallback((goalId: string) => {
+    setWeeklyGoals(prev => 
+      prev.map(goal => 
+        goal.id === goalId ? { ...goal, completed: true } : goal
+      )
+    );
+    addXP(XP_REWARDS.weeklyGoalBonus);
+  }, [addXP]);
+
   const completeSession = useCallback((bookId: string, focusRating?: number) => {
     const today = getTodayDate();
     const newSession: SessionRecord = {
@@ -95,7 +136,7 @@ export const useGameState = () => {
         if (prev.lastSessionDate === yesterdayStr) {
           newStreak = prev.streak + 1;
         } else if (prev.lastSessionDate !== today) {
-          newStreak = 1; // Reset streak but start new one
+          newStreak = 1;
         }
       }
 
@@ -117,8 +158,10 @@ export const useGameState = () => {
         ),
       };
     });
+    
     addXP(XP_REWARDS.sessionComplete);
-  }, [addXP]);
+    updateWeeklyGoals(bookId);
+  }, [addXP, updateWeeklyGoals]);
 
   const updateSessionRating = useCallback((sessionId: string, rating: number) => {
     setStats(prev => ({
@@ -164,6 +207,7 @@ export const useGameState = () => {
   return {
     stats,
     settings,
+    weeklyGoals,
     addXP,
     completeSession,
     completeReflection,
@@ -176,5 +220,6 @@ export const useGameState = () => {
     updateSessionRating,
     pendingFocusRating,
     setPendingFocusRating,
+    completeWeeklyGoal,
   };
 };

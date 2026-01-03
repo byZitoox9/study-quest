@@ -1,24 +1,49 @@
+import { useState } from 'react';
 import { AVATAR_LEVELS } from '@/types/game';
-import type { PlayerStats } from '@/types/game';
+import type { PlayerStats, WeeklyGoal } from '@/types/game';
+import { WeeklyGoals } from './WeeklyGoals';
+import { LearningReminders } from './LearningReminders';
 
 interface DashboardProps {
   stats: PlayerStats;
+  weeklyGoals: WeeklyGoal[];
   onStartSession: () => void;
   onViewStats: () => void;
-  onViewGallery: () => void;
+  onViewEvolution: () => void;
   onViewSettings: () => void;
   onViewSocial: () => void;
+  onGoalComplete: (goalId: string) => void;
+  reduceAnimations?: boolean;
 }
 
-export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery, onViewSettings, onViewSocial }: DashboardProps) => {
+export const Dashboard = ({ 
+  stats, 
+  weeklyGoals,
+  onStartSession, 
+  onViewStats, 
+  onViewEvolution, 
+  onViewSettings, 
+  onViewSocial,
+  onGoalComplete,
+  reduceAnimations
+}: DashboardProps) => {
+  const [showReminder, setShowReminder] = useState(true);
   const currentLevelData = AVATAR_LEVELS.find(l => l.level === stats.avatarLevel);
   const recentBook = stats.books.find(b => b.sessionsCompleted > 0) || stats.books[0];
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in space-y-6">
+      {/* Learning Reminder */}
+      {showReminder && (
+        <LearningReminders 
+          stats={stats} 
+          onDismiss={() => setShowReminder(false)}
+        />
+      )}
+
       {/* Streak Indicator */}
       {stats.streak > 0 && (
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/20 border border-orange-500/30">
             <span className="text-xl">🔥</span>
             <span className="font-bold text-orange-400">{stats.streak} day streak</span>
@@ -27,10 +52,10 @@ export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery, o
       )}
 
       {/* Avatar Card */}
-      <div className="card-glow p-6 rounded-2xl mb-6 text-center">
+      <div className="card-glow p-6 rounded-2xl text-center">
         <div 
           className="text-7xl mb-4 cursor-pointer hover:scale-110 transition-transform"
-          onClick={onViewGallery}
+          onClick={onViewEvolution}
         >
           {currentLevelData?.emoji}
         </div>
@@ -39,15 +64,15 @@ export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery, o
         </h2>
         <p className="text-sm text-muted-foreground mb-4">Level {stats.level}</p>
         <button
-          onClick={onViewGallery}
-          className="text-sm text-primary hover:underline"
+          onClick={onViewEvolution}
+          className="text-sm text-primary hover:underline inline-flex items-center gap-1"
         >
           View Evolution Path →
         </button>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-3 gap-3">
         <div className="stat-card">
           <p className="text-2xl font-bold text-gradient-xp">{stats.totalSessions}</p>
           <p className="text-xs text-muted-foreground">Sessions</p>
@@ -62,9 +87,16 @@ export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery, o
         </div>
       </div>
 
+      {/* Weekly Goals */}
+      <WeeklyGoals 
+        goals={weeklyGoals} 
+        onGoalComplete={onGoalComplete}
+        reduceAnimations={reduceAnimations}
+      />
+
       {/* Recent Book */}
       {recentBook && recentBook.sessionsCompleted > 0 && (
-        <div className="card-glow p-4 rounded-xl mb-6">
+        <div className="card-glow p-4 rounded-xl">
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Continue Learning</p>
           <div className="flex items-center gap-3">
             <span className="text-3xl">{recentBook.icon}</span>
@@ -101,7 +133,7 @@ export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery, o
             📊 Stats
           </button>
           <button
-            onClick={onViewGallery}
+            onClick={onViewEvolution}
             className="btn-secondary"
           >
             🎭 Evolution
@@ -125,7 +157,7 @@ export const Dashboard = ({ stats, onStartSession, onViewStats, onViewGallery, o
       </div>
 
       {/* Demo Note */}
-      <p className="text-xs text-center text-muted-foreground mt-6">
+      <p className="text-xs text-center text-muted-foreground">
         Demo mode • Progress resets on refresh
       </p>
     </div>
