@@ -146,6 +146,13 @@ export const Dashboard = ({
         </button>
       </div>
 
+      {/* Weekly Goals */}
+      <WeeklyGoals 
+        goals={weeklyGoals} 
+        onGoalComplete={onGoalComplete}
+        reduceAnimations={reduceAnimations}
+      />
+
       {/* Avatar Card */}
       <div 
         className="card-glow p-6 rounded-2xl text-center cursor-pointer hover:border-primary/50 transition-colors"
@@ -162,13 +169,6 @@ export const Dashboard = ({
           View Evolution Path →
         </span>
       </div>
-
-      {/* Weekly Goals */}
-      <WeeklyGoals 
-        goals={weeklyGoals} 
-        onGoalComplete={onGoalComplete}
-        reduceAnimations={reduceAnimations}
-      />
 
       {/* Demo Note */}
       <p className="text-xs text-center text-muted-foreground">
