@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { AVATAR_LEVELS } from '@/types/game';
-import type { PlayerStats, WeeklyGoal } from '@/types/game';
+import type { PlayerStats, WeeklyGoal, Achievement } from '@/types/game';
 import { WeeklyGoals } from './WeeklyGoals';
 import { LearningReminders } from './LearningReminders';
 
 interface DashboardProps {
   stats: PlayerStats;
   weeklyGoals: WeeklyGoal[];
+  achievements: Achievement[];
   onStartSession: () => void;
   onViewStats: () => void;
   onViewEvolution: () => void;
   onViewSettings: () => void;
   onViewSocial: () => void;
+  onViewAchievements: () => void;
   onGoalComplete: (goalId: string) => void;
   reduceAnimations?: boolean;
 }
@@ -19,17 +21,20 @@ interface DashboardProps {
 export const Dashboard = ({ 
   stats, 
   weeklyGoals,
+  achievements,
   onStartSession, 
   onViewStats, 
   onViewEvolution, 
   onViewSettings, 
   onViewSocial,
+  onViewAchievements,
   onGoalComplete,
   reduceAnimations
 }: DashboardProps) => {
   const [showReminder, setShowReminder] = useState(true);
   const currentLevelData = AVATAR_LEVELS.find(l => l.level === stats.avatarLevel);
   const recentBook = stats.books.find(b => b.sessionsCompleted > 0) || stats.books[0];
+  const unlockedAchievements = achievements.filter(a => a.unlocked).length;
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -148,12 +153,24 @@ export const Dashboard = ({
             👥 Community
           </button>
           <button
-            onClick={onViewSettings}
-            className="btn-secondary"
+            onClick={onViewAchievements}
+            className="btn-secondary relative"
           >
-            ⚙️ Settings
+            🏆 Badges
+            {unlockedAchievements > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-progress-green text-xs font-bold rounded-full flex items-center justify-center">
+                {unlockedAchievements}
+              </span>
+            )}
           </button>
         </div>
+
+        <button
+          onClick={onViewSettings}
+          className="btn-secondary w-full"
+        >
+          ⚙️ Settings
+        </button>
       </div>
 
       {/* Demo Note */}

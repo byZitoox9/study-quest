@@ -49,6 +49,43 @@ export interface AISynthesis {
   keyTakeaway: string;
 }
 
+export interface BookNote {
+  id: string;
+  bookId: string;
+  sessionId: string;
+  date: string;
+  reflection: SessionReflection;
+  synthesis?: AISynthesis;
+  focusRating?: number;
+}
+
+export const NOTES_CAP_PER_BOOK = 50;
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  unlockedAt?: string;
+  requirement: { type: 'sessions' | 'minutes' | 'books' | 'streak' | 'notes'; value: number };
+}
+
+export const ACHIEVEMENT_DEFINITIONS: Omit<Achievement, 'unlocked' | 'unlockedAt'>[] = [
+  { id: 'first-session', title: 'First Steps', description: 'Complete your first focus session', icon: '🎯', requirement: { type: 'sessions', value: 1 } },
+  { id: '5-sessions', title: 'Getting Warmed Up', description: 'Complete 5 focus sessions', icon: '🔥', requirement: { type: 'sessions', value: 5 } },
+  { id: '10-sessions', title: 'Dedicated Learner', description: 'Complete 10 focus sessions', icon: '⭐', requirement: { type: 'sessions', value: 10 } },
+  { id: '25-sessions', title: 'Study Master', description: 'Complete 25 focus sessions', icon: '🏆', requirement: { type: 'sessions', value: 25 } },
+  { id: '1-hour', title: 'Hour of Power', description: 'Study for 60 minutes total', icon: '⏱️', requirement: { type: 'minutes', value: 60 } },
+  { id: '5-hours', title: 'Time Investor', description: 'Study for 5 hours total', icon: '⌛', requirement: { type: 'minutes', value: 300 } },
+  { id: '2-books', title: 'Book Explorer', description: 'Study 2 different books', icon: '📚', requirement: { type: 'books', value: 2 } },
+  { id: '4-books', title: 'Knowledge Seeker', description: 'Study all 4 core subjects', icon: '🎓', requirement: { type: 'books', value: 4 } },
+  { id: '3-streak', title: 'Consistent', description: 'Maintain a 3-day streak', icon: '🔗', requirement: { type: 'streak', value: 3 } },
+  { id: '7-streak', title: 'Week Warrior', description: 'Maintain a 7-day streak', icon: '💪', requirement: { type: 'streak', value: 7 } },
+  { id: 'first-note', title: 'Note Taker', description: 'Write your first reflection note', icon: '📝', requirement: { type: 'notes', value: 1 } },
+  { id: '10-notes', title: 'Thoughtful Learner', description: 'Write 10 reflection notes', icon: '🧠', requirement: { type: 'notes', value: 10 } },
+];
+
 export const AVATAR_LEVELS: { level: AvatarLevel; name: string; minXP: number; emoji: string; description: string }[] = [
   { level: 'toddler', name: 'Curious Toddler', minXP: 0, emoji: '🐣', description: 'Just hatched! Ready to explore.' },
   { level: 'beginner', name: 'Eager Beginner', minXP: 100, emoji: '🐥', description: 'Taking the first steps on the learning journey.' },
