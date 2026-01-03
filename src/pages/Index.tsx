@@ -15,7 +15,9 @@ import { SocialPreview } from '@/components/SocialPreview';
 import { WaitlistCTA } from '@/components/WaitlistCTA';
 import { Dashboard } from '@/components/Dashboard';
 import { MascotHelper } from '@/components/MascotHelper';
-import type { Book, SessionReflection } from '@/types/game';
+import { BookNotesView } from '@/components/BookNotesView';
+import { AchievementBadges } from '@/components/AchievementBadges';
+import type { Book, SessionReflection, AISynthesis as AISynthesisType } from '@/types/game';
 
 type AppScreen = 
   | 'onboarding' 
@@ -29,12 +31,15 @@ type AppScreen =
   | 'evolution'
   | 'settings'
   | 'social'
-  | 'waitlist';
+  | 'waitlist'
+  | 'book-notes'
+  | 'achievements';
 
 const Index = () => {
   const [screen, setScreen] = useState<AppScreen>('onboarding');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [currentReflection, setCurrentReflection] = useState<SessionReflection | null>(null);
+  const [currentSynthesis, setCurrentSynthesis] = useState<AISynthesisType | null>(null);
   const [sessionsThisVisit, setSessionsThisVisit] = useState(0);
   const [pendingRating, setPendingRating] = useState<number | undefined>(undefined);
 
@@ -42,6 +47,8 @@ const Index = () => {
     stats,
     settings,
     weeklyGoals,
+    bookNotes,
+    achievements,
     completeSession,
     completeReflection,
     completeSynthesis,
@@ -51,6 +58,8 @@ const Index = () => {
     dismissLevelUp,
     updateSettings,
     completeWeeklyGoal,
+    addBookNote,
+    deleteBookNote,
   } = useGameState();
 
   const handleOnboardingComplete = () => {
@@ -58,7 +67,6 @@ const Index = () => {
   };
 
   const handleStartSession = () => {
-    // Always go to book selection first
     setScreen('book-selection');
   };
 
@@ -114,18 +122,29 @@ const Index = () => {
     handleSessionEnd();
   };
 
-  const handleSynthesisComplete = () => {
+  const handleSynthesisComplete = (synthesis?: AISynthesisType) => {
     completeSynthesis();
+    // Save the note with reflection and synthesis
+    if (selectedBook && currentReflection) {
+      addBookNote(selectedBook.id, currentReflection, synthesis, pendingRating);
+    }
+    setCurrentSynthesis(synthesis || null);
     handleSessionEnd();
   };
 
   const handleSynthesisSkip = () => {
+    // Save note without synthesis
+    if (selectedBook && currentReflection) {
+      addBookNote(selectedBook.id, currentReflection, undefined, pendingRating);
+    }
     handleSessionEnd();
   };
 
   const handleSessionEnd = () => {
     setSessionsThisVisit(prev => prev + 1);
     setPendingRating(undefined);
+    setCurrentReflection(null);
+    setCurrentSynthesis(null);
     if (sessionsThisVisit >= 1) {
       setScreen('waitlist');
     } else {
@@ -145,6 +164,11 @@ const Index = () => {
 
   const handleBookSelectionBack = () => {
     setScreen('dashboard');
+  };
+
+  const handleViewNotes = (book: Book) => {
+    setSelectedBook(book);
+    setScreen('book-notes');
   };
 
   const showXPBar = screen !== 'onboarding';
@@ -175,11 +199,13 @@ const Index = () => {
           <Dashboard
             stats={stats}
             weeklyGoals={weeklyGoals}
+            achievements={achievements}
             onStartSession={handleStartSession}
             onViewStats={() => setScreen('stats')}
             onViewEvolution={() => setScreen('evolution')}
             onViewSettings={() => setScreen('settings')}
             onViewSocial={() => setScreen('social')}
+            onViewAchievements={() => setScreen('achievements')}
             onGoalComplete={completeWeeklyGoal}
             reduceAnimations={settings.reduceAnimations}
           />
@@ -188,11 +214,30 @@ const Index = () => {
         {screen === 'book-selection' && (
           <BookSelection
             books={stats.books}
+            bookNotes={bookNotes}
             selectedBook={selectedBook}
             onSelectBook={handleBookSelect}
             onAddCustomBook={addCustomBook}
             onStartSession={handleBookSelectionStart}
+            onViewNotes={handleViewNotes}
             onBack={handleBookSelectionBack}
+          />
+        )}
+
+        {screen === 'book-notes' && selectedBook && (
+          <BookNotesView
+            book={selectedBook}
+            notes={bookNotes}
+            onClose={() => setScreen('book-selection')}
+            onDeleteNote={deleteBookNote}
+          />
+        )}
+
+        {screen === 'achievements' && (
+          <AchievementBadges
+            achievements={achievements}
+            onClose={() => setScreen('dashboard')}
+            reduceAnimations={settings.reduceAnimations}
           />
         )}
 

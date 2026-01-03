@@ -1,22 +1,26 @@
 import { useState } from 'react';
-import type { Book } from '@/types/game';
+import type { Book, BookNote } from '@/types/game';
 import { XP_REWARDS } from '@/types/game';
 
 interface BookSelectionProps {
   books: Book[];
+  bookNotes: BookNote[];
   selectedBook: Book | null;
   onSelectBook: (book: Book) => void;
   onAddCustomBook: (title: string) => Book;
   onStartSession: () => void;
+  onViewNotes: (book: Book) => void;
   onBack?: () => void;
 }
 
 export const BookSelection = ({ 
   books, 
+  bookNotes,
   selectedBook, 
   onSelectBook, 
   onAddCustomBook,
   onStartSession,
+  onViewNotes,
   onBack
 }: BookSelectionProps) => {
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -32,6 +36,7 @@ export const BookSelection = ({
   };
 
   const getBookLevel = (book: Book) => Math.floor(book.progress / 20) + 1;
+  const getBookNotesCount = (bookId: string) => bookNotes.filter(n => n.bookId === bookId).length;
   
   const estimatedXP = XP_REWARDS.sessionComplete + XP_REWARDS.reflection + XP_REWARDS.aiSynthesis;
 
@@ -58,37 +63,40 @@ export const BookSelection = ({
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-6">
-        {books.map((book) => (
-          <button
-            key={book.id}
-            onClick={() => onSelectBook(book)}
-            className={`book-card text-left ${selectedBook?.id === book.id ? 'selected' : ''}`}
-          >
-            <div className="flex items-start gap-3">
-              <span className="text-3xl">{book.icon}</span>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground truncate">{book.title}</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {book.sessionsCompleted} sessions
-                </p>
-                {book.progress > 0 && (
-                  <div className="mt-2">
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-progress-green font-medium">Lv.{getBookLevel(book)}</span>
-                      <span className="text-muted-foreground">{book.progress}%</span>
+        {books.map((book) => {
+          const notesCount = getBookNotesCount(book.id);
+          return (
+            <button
+              key={book.id}
+              onClick={() => onSelectBook(book)}
+              className={`book-card text-left ${selectedBook?.id === book.id ? 'selected' : ''}`}
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-3xl">{book.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-foreground truncate">{book.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {book.sessionsCompleted} sessions {notesCount > 0 && `• ${notesCount} notes`}
+                  </p>
+                  {book.progress > 0 && (
+                    <div className="mt-2">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-progress-green font-medium">Lv.{getBookLevel(book)}</span>
+                        <span className="text-muted-foreground">{book.progress}%</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-progress-green rounded-full transition-all duration-500"
+                          style={{ width: `${book.progress}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-progress-green rounded-full transition-all duration-500"
-                        style={{ width: `${book.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       {!showCustomInput ? (
@@ -145,6 +153,27 @@ export const BookSelection = ({
               </div>
             </div>
           </div>
+
+          {/* View Notes action */}
+          {getBookNotesCount(selectedBook.id) > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewNotes(selectedBook);
+              }}
+              className="w-full mb-3 p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors text-left"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span>📝</span>
+                  <span className="text-sm text-foreground">View Notes</span>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {getBookNotesCount(selectedBook.id)} notes
+                </span>
+              </div>
+            </button>
+          )}
 
           {/* XP Estimate */}
           <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-xp/10 border border-gradient-xp/20 mb-4">
