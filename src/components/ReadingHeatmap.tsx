@@ -25,6 +25,27 @@ export const ReadingHeatmap = ({ sessions, timeFilter }: ReadingHeatmapProps) =>
     return days;
   }, [sessions, timeFilter]);
 
+  // Move useMemo before any conditional returns to follow React hooks rules
+  const monthGroups = useMemo(() => {
+    const groups: { month: string; count: number }[] = [];
+    const months: Record<string, number> = {};
+    
+    heatmapData.forEach(day => {
+      const month = day.date.substring(0, 7);
+      months[month] = (months[month] || 0) + day.count;
+    });
+
+    Object.entries(months).forEach(([month, count]) => {
+      const date = new Date(month + '-01');
+      groups.push({
+        month: date.toLocaleDateString('en-US', { month: 'short' }),
+        count
+      });
+    });
+
+    return groups.slice(-12);
+  }, [heatmapData]);
+
   const getIntensityClass = (count: number) => {
     if (count === 0) return 'bg-muted';
     if (count === 1) return 'bg-progress-green/40';
@@ -53,7 +74,7 @@ export const ReadingHeatmap = ({ sessions, timeFilter }: ReadingHeatmapProps) =>
         <div className="space-y-1">
           {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className="grid grid-cols-7 gap-1">
-              {week.map((day, dayIndex) => (
+              {week.map((day) => (
                 <div
                   key={day.date}
                   className={`aspect-square rounded-sm ${getIntensityClass(day.count)} transition-colors`}
@@ -75,27 +96,7 @@ export const ReadingHeatmap = ({ sessions, timeFilter }: ReadingHeatmapProps) =>
     );
   }
 
-  // Simplified year view
-  const monthGroups = useMemo(() => {
-    const groups: { month: string; count: number }[] = [];
-    const months: Record<string, number> = {};
-    
-    heatmapData.forEach(day => {
-      const month = day.date.substring(0, 7);
-      months[month] = (months[month] || 0) + day.count;
-    });
-
-    Object.entries(months).forEach(([month, count]) => {
-      const date = new Date(month + '-01');
-      groups.push({
-        month: date.toLocaleDateString('en-US', { month: 'short' }),
-        count
-      });
-    });
-
-    return groups.slice(-12);
-  }, [heatmapData]);
-
+  // Year view using monthGroups
   return (
     <div className="card-glow p-4 rounded-xl">
       <div className="grid grid-cols-6 gap-2">
