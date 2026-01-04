@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          credits_remaining: number | null
+          display_name: string | null
+          id: string
+          is_premium: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_remaining?: number | null
+          display_name?: string | null
+          id?: string
+          is_premium?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_remaining?: number | null
+          display_name?: string | null
+          id?: string
+          is_premium?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          avatar_level: string | null
+          book_notes: Json | null
+          books: Json | null
+          created_at: string
+          current_level_xp: number | null
+          id: string
+          last_session_date: string | null
+          level: number | null
+          session_history: Json | null
+          settings: Json | null
+          streak: number | null
+          total_minutes: number | null
+          total_sessions: number | null
+          total_xp: number | null
+          updated_at: string
+          user_id: string
+          weekly_goals: Json | null
+          xp_to_next_level: number | null
+        }
+        Insert: {
+          avatar_level?: string | null
+          book_notes?: Json | null
+          books?: Json | null
+          created_at?: string
+          current_level_xp?: number | null
+          id?: string
+          last_session_date?: string | null
+          level?: number | null
+          session_history?: Json | null
+          settings?: Json | null
+          streak?: number | null
+          total_minutes?: number | null
+          total_sessions?: number | null
+          total_xp?: number | null
+          updated_at?: string
+          user_id: string
+          weekly_goals?: Json | null
+          xp_to_next_level?: number | null
+        }
+        Update: {
+          avatar_level?: string | null
+          book_notes?: Json | null
+          books?: Json | null
+          created_at?: string
+          current_level_xp?: number | null
+          id?: string
+          last_session_date?: string | null
+          level?: number | null
+          session_history?: Json | null
+          settings?: Json | null
+          streak?: number | null
+          total_minutes?: number | null
+          total_sessions?: number | null
+          total_xp?: number | null
+          updated_at?: string
+          user_id?: string
+          weekly_goals?: Json | null
+          xp_to_next_level?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
