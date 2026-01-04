@@ -299,9 +299,14 @@ const Index = () => {
               </button>
             )}
             <div className="hidden md:block">
-              <UserMenu />
+              <UserMenu onUpgradeClick={() => setScreen('upgrade')} />
             </div>
-            <MobileNav showAuth={true} links={[{ href: '/', label: 'Home' }]} />
+            <MobileNav 
+              showAuth={true} 
+              links={[{ href: '/', label: 'Home' }]} 
+              onUpgradeClick={() => setScreen('upgrade')}
+              sessionsRemaining={isGuest && typeof guestSessionsRemaining === 'number' ? guestSessionsRemaining : undefined}
+            />
           </div>
         </div>
       </header>
