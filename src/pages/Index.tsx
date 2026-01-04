@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useGameState } from '@/hooks/useGameState';
 import { useAuth } from '@/contexts/AuthContext';
 import { XPBar } from '@/components/XPBar';
@@ -22,7 +23,9 @@ import { GuestBanner } from '@/components/auth/GuestBanner';
 import { SoftLockScreen } from '@/components/auth/SoftLockScreen';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { MobileNav } from '@/components/MobileNav';
-import { Link } from 'react-router-dom';
+import { UpgradeScreen } from '@/components/UpgradeScreen';
+import { PremiumCelebration } from '@/components/PremiumCelebration';
+import { Crown } from 'lucide-react';
 import type { Book, SessionReflection, AISynthesis as AISynthesisType } from '@/types/game';
 
 type AppScreen = 
@@ -40,11 +43,13 @@ type AppScreen =
   | 'waitlist'
   | 'book-notes'
   | 'achievements'
-  | 'soft-lock';
+  | 'soft-lock'
+  | 'upgrade';
 
 const GUEST_SESSION_LIMIT = 2;
 
 const Index = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [screen, setScreen] = useState<AppScreen>('onboarding');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [currentReflection, setCurrentReflection] = useState<SessionReflection | null>(null);
@@ -52,8 +57,16 @@ const Index = () => {
   const [sessionsThisVisit, setSessionsThisVisit] = useState(0);
   const [pendingRating, setPendingRating] = useState<number | undefined>(undefined);
   const [showGuestBanner, setShowGuestBanner] = useState(true);
+  const [showCelebration, setShowCelebration] = useState(false);
 
-  const { isGuest, isLoggedIn, mergeGuestProgress } = useAuth();
+  const { 
+    isGuest, 
+    isLoggedIn, 
+    isPremium, 
+    mergeGuestProgress, 
+    checkPurchaseStatus,
+    setPremiumStatus 
+  } = useAuth();
 
   const {
     stats,
@@ -74,6 +87,21 @@ const Index = () => {
     deleteBookNote,
   } = useGameState();
 
+  // Check for payment success in URL
+  useEffect(() => {
+    const payment = searchParams.get('payment');
+    if (payment === 'success') {
+      // Check purchase status and show celebration
+      checkPurchaseStatus().then((status) => {
+        if (status?.isPremium) {
+          setShowCelebration(true);
+        }
+      });
+      // Clear the URL param
+      setSearchParams({});
+    }
+  }, [searchParams, checkPurchaseStatus, setSearchParams]);
+
   // Merge guest progress when user logs in
   useEffect(() => {
     if (isLoggedIn && sessionsThisVisit > 0) {
@@ -91,6 +119,12 @@ const Index = () => {
   };
 
   const handleStartSession = () => {
+    // Premium users have unlimited access
+    if (isPremium) {
+      setScreen('book-selection');
+      return;
+    }
+
     // Check if guest has used all sessions
     if (isGuest && sessionsThisVisit >= GUEST_SESSION_LIMIT) {
       setScreen('soft-lock');
@@ -153,7 +187,6 @@ const Index = () => {
 
   const handleSynthesisComplete = (synthesis?: AISynthesisType) => {
     completeSynthesis();
-    // Save the note with reflection and synthesis
     if (selectedBook && currentReflection) {
       addBookNote(selectedBook.id, currentReflection, synthesis, pendingRating);
     }
@@ -162,7 +195,6 @@ const Index = () => {
   };
 
   const handleSynthesisSkip = () => {
-    // Save note without synthesis
     if (selectedBook && currentReflection) {
       addBookNote(selectedBook.id, currentReflection, undefined, pendingRating);
     }
@@ -175,6 +207,12 @@ const Index = () => {
     setCurrentReflection(null);
     setCurrentSynthesis(null);
     
+    // Premium users never see limits
+    if (isPremium) {
+      setScreen('dashboard');
+      return;
+    }
+
     // For guests, show soft lock after using all sessions
     if (isGuest && sessionsThisVisit + 1 >= GUEST_SESSION_LIMIT) {
       setScreen('soft-lock');
@@ -208,14 +246,29 @@ const Index = () => {
     setScreen('dashboard');
   };
 
-  const showXPBar = screen !== 'onboarding' && screen !== 'soft-lock';
-  const showMascotHelper = screen !== 'onboarding' && screen !== 'focus-session' && screen !== 'soft-lock';
+  const handleUpgradeSuccess = () => {
+    setShowCelebration(true);
+    setScreen('dashboard');
+  };
+
+  const handleCelebrationDismiss = () => {
+    setShowCelebration(false);
+    setScreen('dashboard');
+  };
+
+  const showXPBar = screen !== 'onboarding' && screen !== 'soft-lock' && screen !== 'upgrade';
+  const showMascotHelper = screen !== 'onboarding' && screen !== 'focus-session' && screen !== 'soft-lock' && screen !== 'upgrade';
 
   // Calculate remaining sessions for guest
-  const guestSessionsRemaining = Math.max(0, GUEST_SESSION_LIMIT - sessionsThisVisit);
+  const guestSessionsRemaining = isPremium ? 'unlimited' : Math.max(0, GUEST_SESSION_LIMIT - sessionsThisVisit);
 
   return (
     <div className={`min-h-screen ${settings.reduceAnimations ? 'reduce-motion' : ''}`}>
+      {/* Premium Celebration */}
+      {showCelebration && (
+        <PremiumCelebration onDismiss={handleCelebrationDismiss} />
+      )}
+
       {/* Demo Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
@@ -224,13 +277,26 @@ const Index = () => {
               🦉
             </div>
             <span className="font-display font-bold text-sm">StudyQuest</span>
+            {isPremium && (
+              <span className="flex items-center gap-1 text-xs bg-xp-gold/20 text-xp-gold px-2 py-0.5 rounded-full">
+                <Crown className="w-3 h-3" /> Premium
+              </span>
+            )}
           </Link>
           
           <div className="flex items-center gap-2">
-            {isGuest && guestSessionsRemaining > 0 && (
+            {!isPremium && isGuest && typeof guestSessionsRemaining === 'number' && guestSessionsRemaining > 0 && (
               <span className="text-xs text-muted-foreground hidden sm:block">
                 {guestSessionsRemaining} free session{guestSessionsRemaining !== 1 ? 's' : ''} left
               </span>
+            )}
+            {!isPremium && isLoggedIn && (
+              <button
+                onClick={() => setScreen('upgrade')}
+                className="text-xs bg-gradient-to-r from-xp-gold to-yellow-600 text-background px-3 py-1.5 rounded-full font-medium hover:opacity-90 transition-opacity hidden sm:flex items-center gap-1"
+              >
+                <Crown className="w-3 h-3" /> Upgrade
+              </button>
             )}
             <div className="hidden md:block">
               <UserMenu />
@@ -254,10 +320,10 @@ const Index = () => {
         <MascotHelper reduceAnimations={settings.reduceAnimations} />
       )}
 
-      {/* Guest Banner - show on dashboard for guests */}
-      {isGuest && showGuestBanner && screen === 'dashboard' && (
+      {/* Guest Banner - show on dashboard for guests (not premium) */}
+      {isGuest && !isPremium && showGuestBanner && screen === 'dashboard' && (
         <GuestBanner 
-          creditsRemaining={guestSessionsRemaining}
+          creditsRemaining={typeof guestSessionsRemaining === 'number' ? guestSessionsRemaining : 0}
           onDismiss={() => setShowGuestBanner(false)}
         />
       )}
@@ -269,6 +335,13 @@ const Index = () => {
 
         {screen === 'soft-lock' && (
           <SoftLockScreen onContinueAsGuest={handleContinueAsGuest} />
+        )}
+
+        {screen === 'upgrade' && (
+          <UpgradeScreen
+            onClose={() => setScreen('dashboard')}
+            onUpgradeSuccess={handleUpgradeSuccess}
+          />
         )}
 
         {screen === 'dashboard' && (
@@ -283,6 +356,7 @@ const Index = () => {
             onViewSocial={() => setScreen('social')}
             onViewAchievements={() => setScreen('achievements')}
             onGoalComplete={completeWeeklyGoal}
+            onViewUpgrade={() => setScreen('upgrade')}
             reduceAnimations={settings.reduceAnimations}
           />
         )}
