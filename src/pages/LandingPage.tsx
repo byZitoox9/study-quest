@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,15 +20,22 @@ import {
   Calendar,
   MessageCircle,
   Play,
-  X
+  X,
+  Pause,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Mascot } from '@/components/Mascot';
+import demoVideo from '@/assets/demo-walkthrough.mp4';
 
 const LandingPage = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleWaitlist = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,14 +45,51 @@ const LandingPage = () => {
     }
   };
 
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const handleVideoOpen = () => {
+    setVideoOpen(true);
+    setIsPlaying(true);
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 100);
+  };
+
+  const handleVideoClose = () => {
+    setVideoOpen(false);
+    setIsPlaying(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-lg">
+              🦉
             </div>
             <span className="font-display font-bold text-lg">StudyQuest</span>
           </div>
@@ -163,48 +207,20 @@ const LandingPage = () => {
           {/* Video Thumbnail */}
           <div 
             className="relative aspect-video max-w-4xl mx-auto rounded-2xl overflow-hidden cursor-pointer group shadow-2xl border border-border/50"
-            onClick={() => setVideoOpen(true)}
+            onClick={handleVideoOpen}
           >
-            {/* Thumbnail Background - Animated Preview */}
-            <div className="absolute inset-0 bg-gradient-to-br from-card via-background to-muted">
-              {/* Simulated App UI as thumbnail */}
-              <div className="absolute inset-0 p-8 flex items-center justify-center">
-                <div className="w-full max-w-2xl space-y-4">
-                  {/* Simulated XP Bar */}
-                  <div className="bg-background/60 backdrop-blur rounded-xl p-4 animate-fade-in">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Level 3 • Learner</span>
-                      <span className="text-xs text-xp-gold font-bold">1,250 XP</span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full w-1/2 bg-gradient-to-r from-xp-gold to-xp-gold-light rounded-full animate-pulse" />
-                    </div>
-                  </div>
-                  
-                  {/* Simulated Content Cards */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-background/60 backdrop-blur rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                      <Timer className="w-6 h-6 text-primary mx-auto mb-2" />
-                      <span className="text-xs text-muted-foreground">Focus Session</span>
-                    </div>
-                    <div className="bg-background/60 backdrop-blur rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                      <Brain className="w-6 h-6 text-accent mx-auto mb-2" />
-                      <span className="text-xs text-muted-foreground">AI Synthesis</span>
-                    </div>
-                    <div className="bg-background/60 backdrop-blur rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
-                      <Trophy className="w-6 h-6 text-xp-gold mx-auto mb-2" />
-                      <span className="text-xs text-muted-foreground">Level Up</span>
-                    </div>
-                  </div>
-                  
-                  {/* Mascot in corner */}
-                  <div className="absolute bottom-4 right-4 text-4xl animate-float">🦉</div>
-                </div>
-              </div>
-              
-              {/* Overlay gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-            </div>
+            {/* Video as thumbnail (muted, looping preview) */}
+            <video 
+              className="absolute inset-0 w-full h-full object-cover"
+              src={demoVideo}
+              muted
+              loop
+              playsInline
+              autoPlay
+            />
+            
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent group-hover:opacity-50 transition-opacity" />
 
             {/* Play Button Overlay */}
             <div className="absolute inset-0 flex items-center justify-center">
@@ -222,9 +238,9 @@ const LandingPage = () => {
             {/* Video captions overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-6 text-center">
               <p className="text-lg md:text-xl font-medium text-foreground">
-                60-second walkthrough of the full experience
+                See StudyQuest in action
               </p>
-              <p className="text-sm text-muted-foreground mt-1">Click to watch</p>
+              <p className="text-sm text-muted-foreground mt-1">Click to watch with sound</p>
             </div>
 
             {/* Decorative elements */}
@@ -273,60 +289,63 @@ const LandingPage = () => {
         </div>
 
         {/* Video Modal */}
-        <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
+        <Dialog open={videoOpen} onOpenChange={handleVideoClose}>
           <DialogContent className="max-w-5xl w-full p-0 bg-background border-border overflow-hidden">
-            <div className="relative aspect-video bg-muted">
+            <div className="relative aspect-video bg-black">
+              {/* Actual Video Player */}
+              <video 
+                ref={videoRef}
+                className="absolute inset-0 w-full h-full object-contain"
+                src={demoVideo}
+                muted={isMuted}
+                playsInline
+                onEnded={() => setIsPlaying(false)}
+              />
+              
+              {/* Video Controls Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                <button 
+                  onClick={togglePlay}
+                  className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                >
+                  {isPlaying ? (
+                    <Pause className="w-7 h-7 text-primary-foreground" fill="currentColor" />
+                  ) : (
+                    <Play className="w-7 h-7 text-primary-foreground ml-1" fill="currentColor" />
+                  )}
+                </button>
+              </div>
+              
+              {/* Bottom Controls */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                <div className="flex items-center justify-between">
+                  <button 
+                    onClick={toggleMute}
+                    className="w-10 h-10 rounded-full bg-background/20 backdrop-blur-sm flex items-center justify-center hover:bg-background/40 transition-colors"
+                  >
+                    {isMuted ? (
+                      <VolumeX className="w-5 h-5 text-white" />
+                    ) : (
+                      <Volume2 className="w-5 h-5 text-white" />
+                    )}
+                  </button>
+                  
+                  <Link to="/demo" onClick={handleVideoClose}>
+                    <Button size="sm" className="btn-primary">
+                      Try Demo Now
+                      <ChevronRight className="ml-1 w-4 h-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              
               {/* Close button */}
               <button 
-                onClick={() => setVideoOpen(false)}
+                onClick={handleVideoClose}
                 className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
-              
-              {/* Placeholder Video Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
-                <div className="text-6xl mb-6 animate-float">🦉</div>
-                <h3 className="font-display text-2xl font-bold mb-4 text-center">Demo Video Coming Soon</h3>
-                <p className="text-muted-foreground text-center max-w-md mb-8">
-                  We're putting the finishing touches on our explainer video. In the meantime, try the interactive demo!
-                </p>
-                
-                {/* Simulated video timeline */}
-                <div className="w-full max-w-2xl space-y-4">
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="text-muted-foreground">0:00</span>
-                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                      <div className="h-full w-0 bg-primary rounded-full" />
-                    </div>
-                    <span className="text-muted-foreground">1:30</span>
-                  </div>
-                  
-                  {/* Video chapters preview */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-center">
-                    {[
-                      { time: "0:00", label: "Meet your mascot" },
-                      { time: "0:15", label: "Select a book" },
-                      { time: "0:30", label: "Focus session" },
-                      { time: "0:50", label: "Reflect & notes" },
-                      { time: "1:05", label: "AI synthesis" },
-                      { time: "1:20", label: "Level up!" }
-                    ].map((chapter, i) => (
-                      <div key={i} className="py-2 px-3 rounded-lg bg-muted/50">
-                        <p className="text-xs text-primary font-medium">{chapter.time}</p>
-                        <p className="text-xs text-muted-foreground">{chapter.label}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <Link to="/demo" onClick={() => setVideoOpen(false)} className="mt-8">
-                  <Button className="btn-primary">
-                    Try the Interactive Demo Instead
-                    <ChevronRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </Link>
-              </div>
             </div>
           </DialogContent>
         </Dialog>
@@ -616,8 +635,8 @@ const LandingPage = () => {
       <footer className="py-8 px-4 border-t border-border">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Sparkles className="w-3 h-3 text-primary-foreground" />
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm">
+              🦉
             </div>
             <span className="font-display font-bold">StudyQuest</span>
           </div>
