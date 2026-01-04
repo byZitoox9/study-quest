@@ -18,12 +18,18 @@ import {
   Zap,
   TrendingUp,
   Calendar,
-  MessageCircle
+  MessageCircle,
+  Crown,
+  Infinity,
+  Shield,
+  Gift,
+  X
 } from 'lucide-react';
 import { Mascot } from '@/components/Mascot';
 import { MobileNav } from '@/components/MobileNav';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { Footer } from '@/components/Footer';
 
 const LandingPage = () => {
   const [email, setEmail] = useState('');
@@ -569,6 +575,231 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Demo vs Full Version Section */}
+      <section id="pricing" className="py-20 px-4 bg-muted/30 relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-xp-gold/5 rounded-full blur-3xl" />
+        
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 animate-slide-up">
+              Demo vs{' '}
+              <span className="text-gradient-gold">Full Version</span>
+            </h2>
+            <p className="text-lg text-muted-foreground animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              Try everything free, then unlock unlimited access
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Demo Card */}
+            <div className="bg-card rounded-2xl p-8 border border-border animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+                  <BookOpen className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-xl">Demo</h3>
+                  <p className="text-sm text-muted-foreground">Free forever</p>
+                </div>
+              </div>
+              
+              <ul className="space-y-4 mb-8">
+                {[
+                  { text: '2 learning sessions', included: true },
+                  { text: 'Limited credits', included: true },
+                  { text: 'Basic avatars', included: true },
+                  { text: 'Temporary progress', included: true },
+                  { text: 'Try all features', included: true },
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
+                      <Check className="w-3 h-3 text-muted-foreground" />
+                    </div>
+                    <span className="text-muted-foreground">{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link to="/demo">
+                <Button variant="outline" className="w-full py-6 text-lg group">
+                  Try Demo Free
+                  <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <p className="text-center text-sm text-muted-foreground mt-3">No account required</p>
+            </div>
+
+            {/* Full Version Card */}
+            <div className="bg-gradient-to-br from-card to-xp-gold/5 rounded-2xl p-8 border-2 border-xp-gold/30 relative animate-slide-up" style={{ animationDelay: '0.3s' }}>
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-xp-gold text-background px-4 py-1 rounded-full text-sm font-medium">
+                Recommended
+              </div>
+              
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-full bg-xp-gold/20 flex items-center justify-center">
+                  <Crown className="w-6 h-6 text-xp-gold" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-xl">Full Version</h3>
+                  <p className="text-sm text-xp-gold">Lifetime access</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-gradient-gold">$4.99</span>
+                <span className="text-muted-foreground ml-2">one-time</span>
+              </div>
+              
+              <ul className="space-y-4 mb-8">
+                {[
+                  { text: 'Unlimited sessions', icon: Infinity },
+                  { text: 'Unlimited credits', icon: Zap },
+                  { text: 'Premium avatars & crown', icon: Crown },
+                  { text: 'Exclusive themes', icon: Sparkles },
+                  { text: 'Progress saved forever', icon: Shield },
+                  { text: 'No subscription', icon: Check },
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <div className="w-5 h-5 rounded-full bg-xp-gold/20 flex items-center justify-center">
+                      <item.icon className="w-3 h-3 text-xp-gold" />
+                    </div>
+                    <span className="font-medium">{item.text}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link to="/demo">
+                <Button className="w-full py-6 text-lg bg-gradient-to-r from-xp-gold to-yellow-600 hover:from-xp-gold/90 hover:to-yellow-600/90 text-background group">
+                  Unlock Full Version
+                  <Crown className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+              <p className="text-center text-sm text-muted-foreground mt-3">Pay once, own forever</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How Credits Work Section */}
+      <section className="py-20 px-4 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 animate-slide-up">
+              How{' '}
+              <span className="text-gradient-gold">Credits</span>
+              {' '}Work
+            </h2>
+            <p className="text-lg text-muted-foreground animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              Simple system, big rewards
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: '🎯',
+                title: 'Start a Session',
+                description: 'Each focus session uses 1 credit',
+                detail: 'Demo: 2 credits • Premium: ∞',
+              },
+              {
+                icon: '⭐',
+                title: 'Earn XP',
+                description: 'Complete sessions to gain experience points',
+                detail: '25-50 XP per session',
+              },
+              {
+                icon: '🚀',
+                title: 'Level Up',
+                description: 'XP unlocks new avatars and achievements',
+                detail: 'Toddler → Dragon evolution',
+              },
+            ].map((step, i) => (
+              <div 
+                key={i}
+                className="bg-card rounded-2xl p-6 border border-border hover:border-primary/50 transition-all group animate-slide-up"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">{step.icon}</div>
+                <h3 className="font-display font-bold text-lg mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground mb-3">{step.description}</p>
+                <p className="text-xs text-primary font-medium">{step.detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Waitlist Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-background via-primary/5 to-background relative overflow-hidden">
+        <div className="absolute top-1/4 left-10 w-48 h-48 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-10 w-64 h-64 bg-xp-gold/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        
+        <div className="max-w-2xl mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 mb-6 animate-fade-in">
+            <Gift className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">Early Bird Benefits</span>
+          </div>
+
+          <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 animate-slide-up">
+            Join the{' '}
+            <span className="text-gradient-gold">Waitlist</span>
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            Be first in line and get exclusive rewards
+          </p>
+
+          {/* Benefits */}
+          <div className="grid sm:grid-cols-3 gap-4 mb-8">
+            {[
+              { icon: '🏅', title: 'Early Access Badge', desc: 'Show off in your profile' },
+              { icon: '🦊', title: 'Exclusive Avatar', desc: 'Limited edition character' },
+              { icon: '💰', title: '$2.99 Launch Price', desc: 'Save 40% off regular price' },
+            ].map((benefit, i) => (
+              <div 
+                key={i}
+                className="bg-card/50 backdrop-blur-sm rounded-xl p-4 border border-border animate-slide-up"
+                style={{ animationDelay: `${0.2 + i * 0.1}s` }}
+              >
+                <div className="text-2xl mb-2">{benefit.icon}</div>
+                <p className="font-medium text-sm">{benefit.title}</p>
+                <p className="text-xs text-muted-foreground">{benefit.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Waitlist Form */}
+          <div className="bg-card rounded-2xl p-6 border border-border max-w-md mx-auto animate-scale-in" style={{ animationDelay: '0.4s' }}>
+            {submitted ? (
+              <div className="flex items-center gap-3 text-progress-green justify-center py-4">
+                <Check className="w-5 h-5" />
+                <span className="font-medium">You're on the list! Check your email soon.</span>
+              </div>
+            ) : (
+              <>
+                <form onSubmit={handleWaitlist} className="flex gap-3">
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="flex-1"
+                    required
+                  />
+                  <Button type="submit" className="btn-primary">
+                    Join Waitlist
+                  </Button>
+                </form>
+                <p className="text-xs text-muted-foreground mt-3">
+                  No spam, ever. Unsubscribe anytime.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-24 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
@@ -587,63 +818,25 @@ const LandingPage = () => {
             Join thousands of learners who've transformed their study habits
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <Link to="/demo">
               <Button size="lg" className="btn-primary w-full sm:w-auto text-lg px-8 py-6 group animate-pulse-glow hover:scale-105 transition-transform">
-                Try the Demo
+                Try the Demo — Free
                 <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 hover:scale-105 hover:border-primary/50 transition-all">
-              Join the Waitlist
-            </Button>
-          </div>
-
-          {/* Inline Waitlist Form */}
-          <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-6 border border-border max-w-md mx-auto animate-scale-in hover:border-primary/30 transition-all" style={{ animationDelay: '0.3s' }}>
-            {submitted ? (
-              <div className="flex items-center gap-3 text-progress-green animate-bounce-in">
-                <Check className="w-5 h-5" />
-                <span>You're on the list! We'll be in touch soon.</span>
-              </div>
-            ) : (
-              <form onSubmit={handleWaitlist} className="flex gap-3">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 focus:border-primary transition-colors"
-                  required
-                />
-                <Button type="submit" className="btn-primary hover:scale-105 transition-transform">
-                  Join
-                </Button>
-              </form>
-            )}
+            <Link to="/demo">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 hover:scale-105 hover:border-xp-gold/50 transition-all gap-2">
+                <Crown className="w-5 h-5 text-xp-gold" />
+                Unlock Full Version — $4.99
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 border-t border-border">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm">
-              🦉
-            </div>
-            <span className="font-display font-bold">StudyQuest</span>
-          </div>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">About</a>
-            <a href="#" className="hover:text-foreground transition-colors">Contact</a>
-            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Built with ❤️ for learners everywhere
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
