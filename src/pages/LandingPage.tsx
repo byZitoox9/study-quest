@@ -30,17 +30,41 @@ import { MobileNav } from '@/components/MobileNav';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { Footer } from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { analytics } from '@/lib/analytics';
 
 const LandingPage = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { isGuest } = useAuth();
+  const { toast } = useToast();
 
-  const handleWaitlist = (e: React.FormEvent) => {
+  const scrollToWaitlist = () => {
+    document.getElementById('waitlist-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    if (!email || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.from('waitlist').insert({ email, source: 'landing' });
+      if (error && error.code !== '23505') throw error; // Ignore duplicate email errors
+      
       setSubmitted(true);
+      analytics.track('waitlist_signup');
       setEmail('');
+    } catch (err) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -62,7 +86,7 @@ const LandingPage = () => {
               <Button variant="ghost" size="sm">Try Demo</Button>
             </Link>
             {isGuest ? (
-              <Button size="sm" className="btn-primary">Join Waitlist</Button>
+              <Button size="sm" className="btn-primary" onClick={scrollToWaitlist}>Join Waitlist</Button>
             ) : (
               <UserMenu />
             )}
@@ -97,7 +121,7 @@ const LandingPage = () => {
                     <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 hover:scale-105 transition-transform hover:border-primary/50">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 hover:scale-105 transition-transform hover:border-primary/50" onClick={scrollToWaitlist}>
                   Join the Waitlist
                 </Button>
               </div>
@@ -331,7 +355,7 @@ const LandingPage = () => {
                   <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 hover:scale-105 transition-transform hover:border-primary/50">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 hover:scale-105 transition-transform hover:border-primary/50" onClick={scrollToWaitlist}>
                 Join the Waitlist
               </Button>
             </div>
@@ -732,7 +756,7 @@ const LandingPage = () => {
       </section>
 
       {/* Waitlist Section */}
-      <section className="py-20 px-4 bg-gradient-to-b from-background via-primary/5 to-background relative overflow-hidden">
+      <section id="waitlist-section" className="py-20 px-4 bg-gradient-to-b from-background via-primary/5 to-background relative overflow-hidden">
         <div className="absolute top-1/4 left-10 w-48 h-48 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-10 w-64 h-64 bg-xp-gold/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
         
