@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { PlayerStats, Book, AvatarLevel, AppSettings, SessionRecord, WeeklyGoal, BookNote, Achievement, AVATAR_LEVELS, XP_REWARDS, DEFAULT_BOOKS, DEFAULT_SETTINGS, DEFAULT_WEEKLY_GOALS, DEMO_SESSION_HISTORY, NOTES_CAP_PER_BOOK, ACHIEVEMENT_DEFINITIONS, SessionReflection, AISynthesis } from '@/types/game';
+import { useAuth } from '@/contexts/AuthContext';
 
 const getAvatarLevel = (totalXP: number): AvatarLevel => {
   for (let i = AVATAR_LEVELS.length - 1; i >= 0; i--) {
@@ -99,15 +100,92 @@ const DEMO_INITIAL_GOALS: WeeklyGoal[] = DEFAULT_WEEKLY_GOALS.map(goal => ({
 }));
 
 export const useGameState = () => {
-  const [stats, setStats] = useState<PlayerStats>(DEMO_INITIAL_STATS);
-  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
-  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>(DEMO_INITIAL_GOALS);
-  const [bookNotes, setBookNotes] = useState<BookNote[]>(DEMO_BOOK_NOTES);
+  const { isLoggedIn, userProgress, saveProgress } = useAuth();
+  
+  // Initialize state from saved progress if logged in
+  const getInitialStats = (): PlayerStats => {
+    if (isLoggedIn && userProgress && userProgress.total_sessions > 0) {
+      return {
+        totalXP: userProgress.total_xp,
+        currentLevelXP: userProgress.current_level_xp,
+        xpToNextLevel: userProgress.xp_to_next_level,
+        level: userProgress.level,
+        avatarLevel: userProgress.avatar_level as AvatarLevel,
+        totalSessions: userProgress.total_sessions,
+        totalMinutes: userProgress.total_minutes,
+        books: userProgress.books as Book[] || DEFAULT_BOOKS,
+        streak: userProgress.streak,
+        lastSessionDate: userProgress.last_session_date,
+        sessionHistory: userProgress.session_history as SessionRecord[] || [],
+      };
+    }
+    return DEMO_INITIAL_STATS;
+  };
+
+  const getInitialBookNotes = (): BookNote[] => {
+    if (isLoggedIn && userProgress && userProgress.book_notes) {
+      return userProgress.book_notes as BookNote[];
+    }
+    return DEMO_BOOK_NOTES;
+  };
+
+  const getInitialGoals = (): WeeklyGoal[] => {
+    if (isLoggedIn && userProgress && userProgress.weekly_goals) {
+      return userProgress.weekly_goals as WeeklyGoal[];
+    }
+    return DEMO_INITIAL_GOALS;
+  };
+
+  const getInitialSettings = (): AppSettings => {
+    if (isLoggedIn && userProgress && userProgress.settings) {
+      return userProgress.settings as AppSettings;
+    }
+    return DEFAULT_SETTINGS;
+  };
+
+  const [stats, setStats] = useState<PlayerStats>(getInitialStats);
+  const [settings, setSettings] = useState<AppSettings>(getInitialSettings);
+  const [weeklyGoals, setWeeklyGoals] = useState<WeeklyGoal[]>(getInitialGoals);
+  const [bookNotes, setBookNotes] = useState<BookNote[]>(getInitialBookNotes);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const [previousLevel, setPreviousLevel] = useState<AvatarLevel>('toddler');
   const [pendingFocusRating, setPendingFocusRating] = useState<string | null>(null);
   const [newAchievement, setNewAchievement] = useState<Achievement | null>(null);
   const [lastSessionId, setLastSessionId] = useState<string | null>(null);
+
+  // Reload state when user logs in and has saved progress
+  useEffect(() => {
+    if (isLoggedIn && userProgress && userProgress.total_sessions > 0) {
+      setStats({
+        totalXP: userProgress.total_xp,
+        currentLevelXP: userProgress.current_level_xp,
+        xpToNextLevel: userProgress.xp_to_next_level,
+        level: userProgress.level,
+        avatarLevel: userProgress.avatar_level as AvatarLevel,
+        totalSessions: userProgress.total_sessions,
+        totalMinutes: userProgress.total_minutes,
+        books: (userProgress.books as Book[]) || DEFAULT_BOOKS,
+        streak: userProgress.streak,
+        lastSessionDate: userProgress.last_session_date,
+        sessionHistory: (userProgress.session_history as SessionRecord[]) || [],
+      });
+      setBookNotes((userProgress.book_notes as BookNote[]) || []);
+      setWeeklyGoals((userProgress.weekly_goals as WeeklyGoal[]) || DEMO_INITIAL_GOALS);
+      setSettings((userProgress.settings as AppSettings) || DEFAULT_SETTINGS);
+    }
+  }, [isLoggedIn, userProgress]);
+
+  // Auto-save progress when logged in
+  const syncProgress = useCallback(() => {
+    if (isLoggedIn) {
+      saveProgress({
+        stats,
+        bookNotes,
+        weeklyGoals,
+        settings,
+      });
+    }
+  }, [isLoggedIn, stats, bookNotes, weeklyGoals, settings, saveProgress]);
 
   // Calculate achievements based on current stats and notes
   const achievements = useMemo(() => {
@@ -228,7 +306,7 @@ export const useGameState = () => {
         }
       }
 
-      return {
+      const newStats = {
         ...prev,
         totalSessions: prev.totalSessions + 1,
         totalMinutes: prev.totalMinutes + 30,
@@ -245,11 +323,18 @@ export const useGameState = () => {
             : book
         ),
       };
+
+      return newStats;
     });
     
     addXP(XP_REWARDS.sessionComplete);
     updateWeeklyGoals(bookId);
-  }, [addXP, updateWeeklyGoals]);
+
+    // Sync progress after session completion (will be triggered by state change)
+    setTimeout(() => {
+      syncProgress();
+    }, 500);
+  }, [addXP, updateWeeklyGoals, syncProgress]);
 
   const addBookNote = useCallback((
     bookId: string, 
@@ -273,13 +358,41 @@ export const useGameState = () => {
       focusRating,
     };
 
-    setBookNotes(prev => [...prev, newNote]);
+    setBookNotes(prev => {
+      const newNotes = [...prev, newNote];
+      // Sync after adding note
+      if (isLoggedIn) {
+        setTimeout(() => {
+          saveProgress({
+            stats,
+            bookNotes: newNotes,
+            weeklyGoals,
+            settings,
+          });
+        }, 100);
+      }
+      return newNotes;
+    });
     return true;
-  }, [bookNotes, lastSessionId]);
+  }, [bookNotes, lastSessionId, isLoggedIn, stats, weeklyGoals, settings, saveProgress]);
 
   const deleteBookNote = useCallback((noteId: string) => {
-    setBookNotes(prev => prev.filter(n => n.id !== noteId));
-  }, []);
+    setBookNotes(prev => {
+      const newNotes = prev.filter(n => n.id !== noteId);
+      // Sync after deleting note
+      if (isLoggedIn) {
+        setTimeout(() => {
+          saveProgress({
+            stats,
+            bookNotes: newNotes,
+            weeklyGoals,
+            settings,
+          });
+        }, 100);
+      }
+      return newNotes;
+    });
+  }, [isLoggedIn, stats, weeklyGoals, settings, saveProgress]);
 
   const getBookNotes = useCallback((bookId: string) => {
     return bookNotes.filter(n => n.bookId === bookId);
@@ -331,8 +444,22 @@ export const useGameState = () => {
   }, []);
 
   const updateSettings = useCallback((newSettings: Partial<AppSettings>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
-  }, []);
+    setSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      // Sync settings change
+      if (isLoggedIn) {
+        setTimeout(() => {
+          saveProgress({
+            stats,
+            bookNotes,
+            weeklyGoals,
+            settings: updated,
+          });
+        }, 100);
+      }
+      return updated;
+    });
+  }, [isLoggedIn, stats, bookNotes, weeklyGoals, saveProgress]);
 
   return {
     stats,
@@ -360,5 +487,6 @@ export const useGameState = () => {
     newAchievement,
     dismissNewAchievement,
     lastSessionId,
+    syncProgress,
   };
 };
