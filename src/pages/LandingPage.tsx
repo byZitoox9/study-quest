@@ -86,59 +86,237 @@ const LandingPage = () => {
             </div>
 
             {/* Hero Visual - App Mockup */}
-            <div className="relative animate-scale-in" style={{ animationDelay: '0.3s' }}>
-              <div className="relative bg-card/50 backdrop-blur-sm rounded-3xl p-6 border border-border shadow-2xl hover:shadow-primary/10 transition-shadow duration-500">
+            <div className="relative animate-scale-in animate-tilt-float" style={{ animationDelay: '0.3s' }}>
+              <div className="relative bg-card/50 backdrop-blur-sm rounded-3xl p-6 border border-border shadow-2xl hover:shadow-primary/20 transition-shadow duration-500 animate-glow-ring">
                 {/* XP Bar Mockup */}
                 <div className="bg-background/80 rounded-2xl p-4 mb-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">Level 5 • Thinker</span>
-                    <span className="text-xs text-xp-gold font-bold animate-pulse">2,450 XP</span>
+                    <span className="text-xs text-xp-gold font-bold animate-shimmer">2,450 XP</span>
                   </div>
                   <div className="h-3 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full w-3/4 bg-gradient-to-r from-xp-gold to-xp-glow rounded-full xp-bar-fill" style={{ animation: 'xp-fill 2s ease-out 0.8s forwards', width: '0%' }} />
+                    <div className="h-full rounded-full xp-bar-shimmer" style={{ animation: 'xp-fill 2s ease-out 0.8s forwards', width: '0%' }} />
                   </div>
                 </div>
 
                 {/* Stats Preview */}
                 <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="bg-background/80 rounded-xl p-3 text-center animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.6s' }}>
-                    <Flame className="w-5 h-5 text-streak-orange mx-auto mb-1 animate-pulse" />
-                    <span className="text-lg font-bold">12</span>
+                  <div className="bg-background/80 rounded-xl p-3 text-center animate-slide-up hover:scale-105 transition-transform group" style={{ animationDelay: '0.6s' }}>
+                    <Flame className="w-5 h-5 text-streak-orange mx-auto mb-1 animate-breathe" />
+                    <span className="text-lg font-bold animate-count-up" style={{ animationDelay: '1s' }}>12</span>
                     <p className="text-xs text-muted-foreground">Day Streak</p>
                   </div>
-                  <div className="bg-background/80 rounded-xl p-3 text-center animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.7s' }}>
-                    <Timer className="w-5 h-5 text-primary mx-auto mb-1" />
+                  <div className="bg-background/80 rounded-xl p-3 text-center animate-slide-up hover:scale-105 transition-transform group" style={{ animationDelay: '0.7s' }}>
+                    <Timer className="w-5 h-5 text-primary mx-auto mb-1 group-hover:animate-pulse" />
                     <span className="text-lg font-bold">8.5h</span>
                     <p className="text-xs text-muted-foreground">Focus Time</p>
                   </div>
-                  <div className="bg-background/80 rounded-xl p-3 text-center animate-slide-up hover:scale-105 transition-transform" style={{ animationDelay: '0.8s' }}>
-                    <BookOpen className="w-5 h-5 text-progress-green mx-auto mb-1" />
+                  <div className="bg-background/80 rounded-xl p-3 text-center animate-slide-up hover:scale-105 transition-transform group" style={{ animationDelay: '0.8s' }}>
+                    <BookOpen className="w-5 h-5 text-progress-green mx-auto mb-1 group-hover:animate-pulse" />
                     <span className="text-lg font-bold">3</span>
                     <p className="text-xs text-muted-foreground">Books</p>
                   </div>
                 </div>
 
-                {/* Mascot */}
-                <div className="absolute -bottom-6 -right-6 transform scale-75 animate-float">
-                  <Mascot message="You're doing great!" />
+                {/* Mascot with idle animation */}
+                <div className="absolute -bottom-6 -right-6 transform scale-75 animate-breathe">
+                  <div className="animate-blink">
+                    <Mascot message="You're doing great!" />
+                  </div>
                 </div>
               </div>
 
-              {/* Floating elements */}
-              <div className="absolute -top-4 -left-4 bg-xp-gold/20 backdrop-blur-sm rounded-xl px-3 py-2 border border-xp-gold/30 animate-float shadow-lg">
-                <span className="text-sm font-bold text-xp-gold">+50 XP</span>
+              {/* Floating elements with enhanced animations */}
+              <div className="absolute -top-4 -left-4 bg-xp-gold/20 backdrop-blur-sm rounded-xl px-3 py-2 border border-xp-gold/30 animate-float-slow shadow-lg">
+                <span className="text-sm font-bold text-xp-gold animate-shimmer">+50 XP</span>
               </div>
-              <div className="absolute top-1/2 -right-8 bg-progress-green/20 backdrop-blur-sm rounded-xl px-3 py-2 border border-progress-green/30 animate-float shadow-lg" style={{ animationDelay: '0.5s' }}>
+              <div className="absolute top-1/2 -right-8 bg-progress-green/20 backdrop-blur-sm rounded-xl px-3 py-2 border border-progress-green/30 animate-float-slow shadow-lg" style={{ animationDelay: '1s' }}>
                 <span className="text-sm font-medium text-progress-green flex items-center gap-1">
-                  <TrendingUp className="w-4 h-4" /> Level Up!
+                  <TrendingUp className="w-4 h-4 animate-pulse" /> Level Up!
                 </span>
               </div>
-              <div className="absolute -bottom-2 left-1/4 bg-accent/20 backdrop-blur-sm rounded-xl px-3 py-2 border border-accent/30 animate-float shadow-lg" style={{ animationDelay: '1s' }}>
+              <div className="absolute -bottom-2 left-1/4 bg-accent/20 backdrop-blur-sm rounded-xl px-3 py-2 border border-accent/30 animate-float-slow shadow-lg" style={{ animationDelay: '2s' }}>
                 <span className="text-sm font-medium text-accent flex items-center gap-1">
-                  <Sparkles className="w-4 h-4" /> AI Ready
+                  <Sparkles className="w-4 h-4 animate-pulse" /> AI Ready
                 </span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* App Showcase Section - Layered Mockups */}
+      <section className="py-20 px-4 bg-gradient-to-b from-background via-muted/10 to-background relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s' }} />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s', animationDelay: '2s' }} />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 animate-slide-up">
+              See Your Progress{' '}
+              <span className="text-gradient-gold">Come to Life</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              Real features. Real progress. Built for learners who want results.
+            </p>
+          </div>
+
+          {/* Layered App Screenshots */}
+          <div className="relative max-w-4xl mx-auto h-[500px] md:h-[550px]">
+            {/* Background Layer - Stats Screen */}
+            <div className="absolute left-0 top-8 w-[280px] md:w-[320px] animate-float-slow opacity-80 hover:opacity-100 transition-opacity" style={{ animationDelay: '0.5s' }}>
+              <div className="bg-card rounded-2xl p-5 border border-border shadow-xl transform -rotate-6 hover:rotate-0 transition-transform duration-500">
+                <div className="flex items-center gap-2 mb-4">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                  <span className="font-display font-bold">Your Stats</span>
+                </div>
+                <div className="space-y-3">
+                  <div className="bg-muted rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">🔥</span>
+                      <span className="text-xl font-bold text-gradient-xp animate-shimmer">12</span>
+                      <span className="text-xs text-muted-foreground">Day Streak</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-muted rounded-lg p-2 text-center">
+                      <span className="text-lg font-bold">17</span>
+                      <p className="text-xs text-muted-foreground">Sessions</p>
+                    </div>
+                    <div className="bg-muted rounded-lg p-2 text-center">
+                      <span className="text-lg font-bold">8.5h</span>
+                      <p className="text-xs text-muted-foreground">Focus</p>
+                    </div>
+                  </div>
+                  {/* Mini Heatmap */}
+                  <div className="grid grid-cols-7 gap-1">
+                    {[...Array(14)].map((_, i) => (
+                      <div 
+                        key={i} 
+                        className={`w-3 h-3 rounded-sm animate-fade-in ${
+                          [0, 2, 5, 6, 8, 10, 12, 13].includes(i) 
+                            ? 'bg-progress-green' 
+                            : 'bg-muted'
+                        }`}
+                        style={{ animationDelay: `${1 + i * 0.05}s` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Center Layer - Main Dashboard */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[300px] md:w-[360px] z-10 animate-scale-in" style={{ animationDelay: '0.3s' }}>
+              <div className="bg-card rounded-2xl p-5 border-2 border-primary/30 shadow-2xl animate-glow-ring">
+                {/* XP Bar */}
+                <div className="bg-background rounded-xl p-3 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl animate-breathe">🧠</span>
+                      <span className="font-semibold">Thinker</span>
+                    </div>
+                    <span className="text-xs text-xp-gold font-bold">Lv.5</span>
+                  </div>
+                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full xp-bar-shimmer" style={{ width: '65%' }} />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">2,450 / 3,000 XP</p>
+                </div>
+
+                {/* Book Progress */}
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Current Books</p>
+                  {[
+                    { icon: '📘', title: 'Atomic Habits', progress: 75 },
+                    { icon: '📗', title: 'Deep Work', progress: 40 },
+                  ].map((book, i) => (
+                    <div key={i} className="bg-muted rounded-lg p-3 animate-slide-up hover:scale-[1.02] transition-transform" style={{ animationDelay: `${0.5 + i * 0.1}s` }}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span>{book.icon}</span>
+                        <span className="text-sm font-medium flex-1">{book.title}</span>
+                        <span className="text-xs text-progress-green">{book.progress}%</span>
+                      </div>
+                      <div className="h-1.5 bg-background rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-progress-green rounded-full transition-all duration-1000"
+                          style={{ width: `${book.progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Start Session Button */}
+                <button className="w-full mt-4 py-3 rounded-xl font-semibold btn-primary animate-pulse-glow">
+                  Start Focus Session
+                </button>
+              </div>
+            </div>
+
+            {/* Right Layer - Evolution Path */}
+            <div className="absolute right-0 top-12 w-[260px] md:w-[300px] animate-float-slow opacity-80 hover:opacity-100 transition-opacity" style={{ animationDelay: '1s' }}>
+              <div className="bg-card rounded-2xl p-5 border border-border shadow-xl transform rotate-6 hover:rotate-0 transition-transform duration-500">
+                <div className="flex items-center gap-2 mb-4">
+                  <Trophy className="w-5 h-5 text-xp-gold" />
+                  <span className="font-display font-bold">Evolution Path</span>
+                </div>
+                <div className="flex justify-between items-center mb-4">
+                  {['👶', '📚', '🧒', '🧠', '🎓', '🐉'].map((emoji, i) => (
+                    <div 
+                      key={i} 
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-lg animate-scale-in ${
+                        i <= 3 ? 'bg-primary/20 border-2 border-primary' : 'bg-muted opacity-50'
+                      } ${i === 3 ? 'animate-breathe ring-2 ring-primary ring-offset-2 ring-offset-card' : ''}`}
+                      style={{ animationDelay: `${0.8 + i * 0.1}s` }}
+                    >
+                      {emoji}
+                    </div>
+                  ))}
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden mb-2">
+                  <div 
+                    className="h-full rounded-full"
+                    style={{ 
+                      width: '60%',
+                      background: 'linear-gradient(90deg, hsl(var(--level-purple)), hsl(var(--primary)))'
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  <span className="text-xp-gold font-semibold">550 XP</span> to next evolution
+                </p>
+              </div>
+            </div>
+
+            {/* Floating Achievement Badge */}
+            <div className="absolute bottom-8 left-1/4 animate-float-slow" style={{ animationDelay: '1.5s' }}>
+              <div className="bg-xp-gold/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-xp-gold/30 shadow-lg animate-glow-ring">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🏆</span>
+                  <div>
+                    <p className="text-sm font-bold text-xp-gold">Week Warrior</p>
+                    <p className="text-xs text-muted-foreground">7-day streak achieved!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTAs under mockup */}
+          <div className="text-center mt-8 animate-slide-up" style={{ animationDelay: '0.6s' }}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/demo">
+                <Button size="lg" className="btn-primary w-full sm:w-auto text-lg px-8 py-6 group animate-pulse-glow hover:scale-105 transition-transform">
+                  Try the Demo
+                  <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 hover:scale-105 transition-transform hover:border-primary/50">
+                Join the Waitlist
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground mt-4">No signup required • Free demo</p>
           </div>
         </div>
       </section>
