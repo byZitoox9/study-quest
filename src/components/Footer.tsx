@@ -1,0 +1,83 @@
+import { Link } from 'react-router-dom';
+import { Mail } from 'lucide-react';
+import { CookieSettingsButton } from './CookieConsent';
+
+export const Footer = () => {
+  return (
+    <footer className="bg-muted/30 border-t border-border/50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-4 gap-8 mb-8">
+          {/* Brand */}
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-lg">
+                🦉
+              </div>
+              <span className="font-display font-bold text-lg">StudyQuest</span>
+            </div>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              Verwandle dein Lernen in sichtbaren Fortschritt. Focus-Sessions, Reflexionen, 
+              und ein Belohnungssystem, das dich motiviert hält.
+            </p>
+          </div>
+
+          {/* Links */}
+          <div>
+            <h4 className="font-semibold mb-4">Produkt</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/demo" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Demo starten
+                </Link>
+              </li>
+              <li>
+                <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Preise
+                </a>
+              </li>
+              <li>
+                <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Funktionen
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="font-semibold mb-4">Rechtliches</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/impressum" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Impressum
+                </Link>
+              </li>
+              <li>
+                <Link to="/datenschutz" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Datenschutz
+                </Link>
+              </li>
+              <li>
+                <CookieSettingsButton />
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom */}
+        <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} StudyQuest. Alle Rechte vorbehalten.
+          </p>
+          <a 
+            href="mailto:kokalolishamer@gmail.com" 
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Mail className="w-4 h-4" />
+            kokalolishamer@gmail.com
+          </a>
+        </div>
+      </div>
+    </footer>
+  );
+};
