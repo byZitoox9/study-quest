@@ -12,7 +12,11 @@ import {
 import { User, LogOut, Crown, Sparkles } from 'lucide-react';
 import { AuthModal } from './AuthModal';
 
-export const UserMenu = () => {
+interface UserMenuProps {
+  onUpgradeClick?: () => void;
+}
+
+export const UserMenu = ({ onUpgradeClick }: UserMenuProps) => {
   const { user, profile, isGuest, isPremium, signOut } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -64,7 +68,10 @@ export const UserMenu = () => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {!isPremium && (
-          <DropdownMenuItem className="text-primary">
+          <DropdownMenuItem 
+            className="text-primary cursor-pointer"
+            onClick={onUpgradeClick}
+          >
             <Sparkles className="w-4 h-4 mr-2" />
             Upgrade to Premium
           </DropdownMenuItem>

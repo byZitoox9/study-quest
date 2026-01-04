@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sparkles, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,12 +9,14 @@ import { AuthModal } from '@/components/auth/AuthModal';
 interface MobileNavProps {
   showAuth?: boolean;
   links?: { href: string; label: string }[];
+  onUpgradeClick?: () => void;
+  sessionsRemaining?: number;
 }
 
-export const MobileNav = ({ showAuth = true, links = [] }: MobileNavProps) => {
+export const MobileNav = ({ showAuth = true, links = [], onUpgradeClick, sessionsRemaining }: MobileNavProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const { isGuest } = useAuth();
+  const { isGuest, isPremium } = useAuth();
 
   const defaultLinks = [
     { href: '/demo', label: 'Try Demo' },
@@ -64,6 +66,43 @@ export const MobileNav = ({ showAuth = true, links = [] }: MobileNavProps) => {
             </button>
           </div>
 
+          {/* Plan Info Section - Show for logged in users */}
+          {!isGuest && (
+            <div className="p-4 border-b border-border">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Current Plan</span>
+                {isPremium ? (
+                  <span className="text-xs bg-xp-gold/20 text-xp-gold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Crown className="w-3 h-3" />
+                    Premium
+                  </span>
+                ) : (
+                  <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+                    Free
+                  </span>
+                )}
+              </div>
+              {!isPremium && sessionsRemaining !== undefined && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {sessionsRemaining} free session{sessionsRemaining !== 1 ? 's' : ''} left
+                </p>
+              )}
+              {!isPremium && onUpgradeClick && (
+                <Button
+                  size="sm"
+                  className="w-full mt-3 btn-primary gap-2"
+                  onClick={() => {
+                    setIsOpen(false);
+                    onUpgradeClick();
+                  }}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Upgrade to Premium
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Navigation Links */}
           <nav className="flex-1 p-4 space-y-2">
             {navLinks.map((link) => (
@@ -105,7 +144,10 @@ export const MobileNav = ({ showAuth = true, links = [] }: MobileNavProps) => {
                 </>
               ) : (
                 <div className="flex justify-center">
-                  <UserMenu />
+                  <UserMenu onUpgradeClick={() => {
+                    setIsOpen(false);
+                    onUpgradeClick?.();
+                  }} />
                 </div>
               )}
             </div>
