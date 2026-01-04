@@ -21,10 +21,14 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { Mascot } from '@/components/Mascot';
+import { MobileNav } from '@/components/MobileNav';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 const LandingPage = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const { isGuest } = useAuth();
 
   const handleWaitlist = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,12 +49,21 @@ const LandingPage = () => {
             </div>
             <span className="font-display font-bold text-lg">StudyQuest</span>
           </div>
-          <div className="flex items-center gap-3">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-3">
             <Link to="/demo">
               <Button variant="ghost" size="sm">Try Demo</Button>
             </Link>
-            <Button size="sm" className="btn-primary">Join Waitlist</Button>
+            {isGuest ? (
+              <Button size="sm" className="btn-primary">Join Waitlist</Button>
+            ) : (
+              <UserMenu />
+            )}
           </div>
+
+          {/* Mobile Navigation */}
+          <MobileNav />
         </div>
       </nav>
 

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGameState } from '@/hooks/useGameState';
+import { useAuth } from '@/contexts/AuthContext';
 import { XPBar } from '@/components/XPBar';
 import { OnboardingScreen } from '@/components/OnboardingScreen';
 import { BookSelection } from '@/components/BookSelection';
@@ -17,6 +18,11 @@ import { Dashboard } from '@/components/Dashboard';
 import { MascotHelper } from '@/components/MascotHelper';
 import { BookNotesView } from '@/components/BookNotesView';
 import { AchievementBadges } from '@/components/AchievementBadges';
+import { GuestBanner } from '@/components/auth/GuestBanner';
+import { SoftLockScreen } from '@/components/auth/SoftLockScreen';
+import { UserMenu } from '@/components/auth/UserMenu';
+import { MobileNav } from '@/components/MobileNav';
+import { Link } from 'react-router-dom';
 import type { Book, SessionReflection, AISynthesis as AISynthesisType } from '@/types/game';
 
 type AppScreen = 
@@ -33,7 +39,10 @@ type AppScreen =
   | 'social'
   | 'waitlist'
   | 'book-notes'
-  | 'achievements';
+  | 'achievements'
+  | 'soft-lock';
+
+const GUEST_SESSION_LIMIT = 2;
 
 const Index = () => {
   const [screen, setScreen] = useState<AppScreen>('onboarding');
@@ -42,6 +51,9 @@ const Index = () => {
   const [currentSynthesis, setCurrentSynthesis] = useState<AISynthesisType | null>(null);
   const [sessionsThisVisit, setSessionsThisVisit] = useState(0);
   const [pendingRating, setPendingRating] = useState<number | undefined>(undefined);
+  const [showGuestBanner, setShowGuestBanner] = useState(true);
+
+  const { isGuest, isLoggedIn, mergeGuestProgress } = useAuth();
 
   const {
     stats,
@@ -62,11 +74,28 @@ const Index = () => {
     deleteBookNote,
   } = useGameState();
 
+  // Merge guest progress when user logs in
+  useEffect(() => {
+    if (isLoggedIn && sessionsThisVisit > 0) {
+      mergeGuestProgress({
+        stats,
+        bookNotes,
+        weeklyGoals,
+        settings,
+      });
+    }
+  }, [isLoggedIn]);
+
   const handleOnboardingComplete = () => {
     setScreen('dashboard');
   };
 
   const handleStartSession = () => {
+    // Check if guest has used all sessions
+    if (isGuest && sessionsThisVisit >= GUEST_SESSION_LIMIT) {
+      setScreen('soft-lock');
+      return;
+    }
     setScreen('book-selection');
   };
 
@@ -145,7 +174,11 @@ const Index = () => {
     setPendingRating(undefined);
     setCurrentReflection(null);
     setCurrentSynthesis(null);
-    if (sessionsThisVisit >= 1) {
+    
+    // For guests, show soft lock after using all sessions
+    if (isGuest && sessionsThisVisit + 1 >= GUEST_SESSION_LIMIT) {
+      setScreen('soft-lock');
+    } else if (sessionsThisVisit >= 1) {
       setScreen('waitlist');
     } else {
       setScreen('dashboard');
@@ -171,11 +204,42 @@ const Index = () => {
     setScreen('book-notes');
   };
 
-  const showXPBar = screen !== 'onboarding';
-  const showMascotHelper = screen !== 'onboarding' && screen !== 'focus-session';
+  const handleContinueAsGuest = () => {
+    setScreen('dashboard');
+  };
+
+  const showXPBar = screen !== 'onboarding' && screen !== 'soft-lock';
+  const showMascotHelper = screen !== 'onboarding' && screen !== 'focus-session' && screen !== 'soft-lock';
+
+  // Calculate remaining sessions for guest
+  const guestSessionsRemaining = Math.max(0, GUEST_SESSION_LIMIT - sessionsThisVisit);
 
   return (
     <div className={`min-h-screen ${settings.reduceAnimations ? 'reduce-motion' : ''}`}>
+      {/* Demo Navigation Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-sm">
+              🦉
+            </div>
+            <span className="font-display font-bold text-sm">StudyQuest</span>
+          </Link>
+          
+          <div className="flex items-center gap-2">
+            {isGuest && guestSessionsRemaining > 0 && (
+              <span className="text-xs text-muted-foreground hidden sm:block">
+                {guestSessionsRemaining} free session{guestSessionsRemaining !== 1 ? 's' : ''} left
+              </span>
+            )}
+            <div className="hidden md:block">
+              <UserMenu />
+            </div>
+            <MobileNav showAuth={true} links={[{ href: '/', label: 'Home' }]} />
+          </div>
+        </div>
+      </header>
+
       {showXPBar && <XPBar stats={stats} />}
       
       {showLevelUp && !settings.reduceAnimations && (
@@ -190,9 +254,21 @@ const Index = () => {
         <MascotHelper reduceAnimations={settings.reduceAnimations} />
       )}
 
-      <main className={`max-w-lg mx-auto px-4 ${showXPBar ? 'pt-24 pb-8' : ''}`}>
+      {/* Guest Banner - show on dashboard for guests */}
+      {isGuest && showGuestBanner && screen === 'dashboard' && (
+        <GuestBanner 
+          creditsRemaining={guestSessionsRemaining}
+          onDismiss={() => setShowGuestBanner(false)}
+        />
+      )}
+
+      <main className={`max-w-lg mx-auto px-4 ${showXPBar ? 'pt-32 pb-8' : 'pt-16'}`}>
         {screen === 'onboarding' && (
           <OnboardingScreen onComplete={handleOnboardingComplete} />
+        )}
+
+        {screen === 'soft-lock' && (
+          <SoftLockScreen onContinueAsGuest={handleContinueAsGuest} />
         )}
 
         {screen === 'dashboard' && (
