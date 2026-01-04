@@ -18,13 +18,17 @@ import {
   Zap,
   TrendingUp,
   Calendar,
-  MessageCircle
+  MessageCircle,
+  Play,
+  X
 } from 'lucide-react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Mascot } from '@/components/Mascot';
 
 const LandingPage = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [videoOpen, setVideoOpen] = useState(false);
 
   const handleWaitlist = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,6 +139,197 @@ const LandingPage = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Demo Video Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
+        
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-6">
+              <Play className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Watch the Demo</span>
+            </div>
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
+              See How Learning Becomes{' '}
+              <span className="text-gradient-gold">Progress</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Watch how StudyQuest transforms your study sessions into visible achievements
+            </p>
+          </div>
+
+          {/* Video Thumbnail */}
+          <div 
+            className="relative aspect-video max-w-4xl mx-auto rounded-2xl overflow-hidden cursor-pointer group shadow-2xl border border-border/50"
+            onClick={() => setVideoOpen(true)}
+          >
+            {/* Thumbnail Background - Animated Preview */}
+            <div className="absolute inset-0 bg-gradient-to-br from-card via-background to-muted">
+              {/* Simulated App UI as thumbnail */}
+              <div className="absolute inset-0 p-8 flex items-center justify-center">
+                <div className="w-full max-w-2xl space-y-4">
+                  {/* Simulated XP Bar */}
+                  <div className="bg-background/60 backdrop-blur rounded-xl p-4 animate-fade-in">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Level 3 • Learner</span>
+                      <span className="text-xs text-xp-gold font-bold">1,250 XP</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full w-1/2 bg-gradient-to-r from-xp-gold to-xp-gold-light rounded-full animate-pulse" />
+                    </div>
+                  </div>
+                  
+                  {/* Simulated Content Cards */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-background/60 backdrop-blur rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                      <Timer className="w-6 h-6 text-primary mx-auto mb-2" />
+                      <span className="text-xs text-muted-foreground">Focus Session</span>
+                    </div>
+                    <div className="bg-background/60 backdrop-blur rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                      <Brain className="w-6 h-6 text-accent mx-auto mb-2" />
+                      <span className="text-xs text-muted-foreground">AI Synthesis</span>
+                    </div>
+                    <div className="bg-background/60 backdrop-blur rounded-xl p-4 text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+                      <Trophy className="w-6 h-6 text-xp-gold mx-auto mb-2" />
+                      <span className="text-xs text-muted-foreground">Level Up</span>
+                    </div>
+                  </div>
+                  
+                  {/* Mascot in corner */}
+                  <div className="absolute bottom-4 right-4 text-4xl animate-float">🦉</div>
+                </div>
+              </div>
+              
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+            </div>
+
+            {/* Play Button Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="relative">
+                {/* Pulse ring */}
+                <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: '2s' }} />
+                
+                {/* Play button */}
+                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground ml-1" fill="currentColor" />
+                </div>
+              </div>
+            </div>
+
+            {/* Video captions overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 text-center">
+              <p className="text-lg md:text-xl font-medium text-foreground">
+                60-second walkthrough of the full experience
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">Click to watch</p>
+            </div>
+
+            {/* Decorative elements */}
+            <div className="absolute top-4 left-4 bg-xp-gold/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-xp-gold/30">
+              <span className="text-xs font-bold text-xp-gold">+50 XP</span>
+            </div>
+            <div className="absolute top-4 right-4 bg-progress-green/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-progress-green/30">
+              <span className="text-xs font-medium text-progress-green flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" /> Level Up!
+              </span>
+            </div>
+          </div>
+
+          {/* Video Feature Highlights */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-3xl mx-auto">
+            {[
+              "Focus for 30 minutes",
+              "Reflect & remember",
+              "Level up your learning",
+              "See your progress grow"
+            ].map((caption, i) => (
+              <div 
+                key={i} 
+                className="text-center py-3 px-4 rounded-xl bg-card/50 border border-border/50 animate-fade-in"
+                style={{ animationDelay: `${i * 0.1}s` }}
+              >
+                <p className="text-sm font-medium text-muted-foreground">{caption}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA under video */}
+          <div className="text-center mt-12">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/demo">
+                <Button size="lg" className="btn-primary w-full sm:w-auto text-lg px-8 py-6 group">
+                  Try the Demo Yourself
+                  <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6">
+                Join the Waitlist
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Video Modal */}
+        <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
+          <DialogContent className="max-w-5xl w-full p-0 bg-background border-border overflow-hidden">
+            <div className="relative aspect-video bg-muted">
+              {/* Close button */}
+              <button 
+                onClick={() => setVideoOpen(false)}
+                className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              {/* Placeholder Video Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
+                <div className="text-6xl mb-6 animate-float">🦉</div>
+                <h3 className="font-display text-2xl font-bold mb-4 text-center">Demo Video Coming Soon</h3>
+                <p className="text-muted-foreground text-center max-w-md mb-8">
+                  We're putting the finishing touches on our explainer video. In the meantime, try the interactive demo!
+                </p>
+                
+                {/* Simulated video timeline */}
+                <div className="w-full max-w-2xl space-y-4">
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="text-muted-foreground">0:00</span>
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full w-0 bg-primary rounded-full" />
+                    </div>
+                    <span className="text-muted-foreground">1:30</span>
+                  </div>
+                  
+                  {/* Video chapters preview */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-center">
+                    {[
+                      { time: "0:00", label: "Meet your mascot" },
+                      { time: "0:15", label: "Select a book" },
+                      { time: "0:30", label: "Focus session" },
+                      { time: "0:50", label: "Reflect & notes" },
+                      { time: "1:05", label: "AI synthesis" },
+                      { time: "1:20", label: "Level up!" }
+                    ].map((chapter, i) => (
+                      <div key={i} className="py-2 px-3 rounded-lg bg-muted/50">
+                        <p className="text-xs text-primary font-medium">{chapter.time}</p>
+                        <p className="text-xs text-muted-foreground">{chapter.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <Link to="/demo" onClick={() => setVideoOpen(false)} className="mt-8">
+                  <Button className="btn-primary">
+                    Try the Interactive Demo Instead
+                    <ChevronRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </section>
 
       {/* Problem Section */}
