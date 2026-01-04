@@ -1,32 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { Button } from '@/components/ui/button';
-import { Cookie, Settings, X, Check } from 'lucide-react';
-
-type CookieConsent = 'pending' | 'all' | 'essential' | 'custom';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
+import { Cookie, Settings, Shield } from 'lucide-react';
 
 interface CookieSettings {
   essential: boolean;
-  functional: boolean;
   analytics: boolean;
+  functional: boolean;
 }
 
-const CONSENT_KEY = 'cookie_consent';
-const SETTINGS_KEY = 'cookie_settings';
+interface CookieConsentContextType {
+  consent: 'pending' | 'accepted' | 'rejected' | 'custom';
+  settings: CookieSettings;
+  acceptAll: () => void;
+  acceptEssential: () => void;
+  saveCustomSettings: (settings: CookieSettings) => void;
+  resetConsent: () => void;
+  showBanner: boolean;
+}
+
+const CookieConsentContext = createContext<CookieConsentContextType | null>(null);
 
 export const useCookieConsent = () => {
-  const [consent, setConsent] = useState<CookieConsent>('pending');
+  const context = useContext(CookieConsentContext);
+  if (!context) {
+    // Return default values if not within provider
+    return {
+      consent: 'pending' as const,
+      settings: { essential: true, analytics: false, functional: false },
+      acceptAll: () => {},
+      acceptEssential: () => {},
+      saveCustomSettings: () => {},
+      resetConsent: () => {},
+      showBanner: false,
+    };
+  }
+  return context;
+};
+
+export const CookieConsentProvider = ({ children }: { children: React.ReactNode }) => {
+  const [consent, setConsent] = useState<'pending' | 'accepted' | 'rejected' | 'custom'>('pending');
   const [settings, setSettings] = useState<CookieSettings>({
     essential: true,
-    functional: false,
     analytics: false,
+    functional: false,
   });
 
   useEffect(() => {
-    const savedConsent = localStorage.getItem(CONSENT_KEY) as CookieConsent;
-    const savedSettings = localStorage.getItem(SETTINGS_KEY);
+    const savedConsent = localStorage.getItem('cookie-consent');
+    const savedSettings = localStorage.getItem('cookie-settings');
     
     if (savedConsent) {
-      setConsent(savedConsent);
+      setConsent(savedConsent as typeof consent);
     }
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));
@@ -34,178 +60,172 @@ export const useCookieConsent = () => {
   }, []);
 
   const acceptAll = () => {
-    const newSettings = { essential: true, functional: true, analytics: true };
-    setConsent('all');
+    const newSettings = { essential: true, analytics: true, functional: true };
     setSettings(newSettings);
-    localStorage.setItem(CONSENT_KEY, 'all');
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
+    setConsent('accepted');
+    localStorage.setItem('cookie-consent', 'accepted');
+    localStorage.setItem('cookie-settings', JSON.stringify(newSettings));
   };
 
   const acceptEssential = () => {
-    const newSettings = { essential: true, functional: false, analytics: false };
-    setConsent('essential');
+    const newSettings = { essential: true, analytics: false, functional: false };
     setSettings(newSettings);
-    localStorage.setItem(CONSENT_KEY, 'essential');
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
+    setConsent('rejected');
+    localStorage.setItem('cookie-consent', 'rejected');
+    localStorage.setItem('cookie-settings', JSON.stringify(newSettings));
   };
 
   const saveCustomSettings = (customSettings: CookieSettings) => {
+    setSettings({ ...customSettings, essential: true });
     setConsent('custom');
-    setSettings(customSettings);
-    localStorage.setItem(CONSENT_KEY, 'custom');
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(customSettings));
+    localStorage.setItem('cookie-consent', 'custom');
+    localStorage.setItem('cookie-settings', JSON.stringify({ ...customSettings, essential: true }));
   };
 
   const resetConsent = () => {
     setConsent('pending');
-    localStorage.removeItem(CONSENT_KEY);
-    localStorage.removeItem(SETTINGS_KEY);
-  };
-
-  return {
-    consent,
-    settings,
-    acceptAll,
-    acceptEssential,
-    saveCustomSettings,
-    resetConsent,
-    showBanner: consent === 'pending',
-  };
-};
-
-export const CookieBanner = () => {
-  const { consent, settings, acceptAll, acceptEssential, saveCustomSettings, showBanner } = useCookieConsent();
-  const [showSettings, setShowSettings] = useState(false);
-  const [customSettings, setCustomSettings] = useState<CookieSettings>({
-    essential: true,
-    functional: false,
-    analytics: false,
-  });
-
-  if (!showBanner) return null;
-
-  const handleSaveCustom = () => {
-    saveCustomSettings(customSettings);
-    setShowSettings(false);
+    localStorage.removeItem('cookie-consent');
+    localStorage.removeItem('cookie-settings');
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 animate-slide-up">
-      <div className="max-w-2xl mx-auto bg-card border border-border rounded-2xl shadow-2xl overflow-hidden">
-        {!showSettings ? (
-          <div className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Cookie className="w-6 h-6 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-2">Cookie-Einstellungen</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Wir verwenden Cookies, um Ihre Anmeldung zu speichern und unsere Dienste zu verbessern. 
-                  Sie können wählen, welche Cookies Sie akzeptieren möchten.
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  <Button onClick={acceptAll} className="btn-primary">
-                    <Check className="w-4 h-4 mr-2" />
-                    Alle akzeptieren
-                  </Button>
-                  <Button onClick={acceptEssential} variant="outline">
-                    Nur notwendige
-                  </Button>
-                  <Button onClick={() => setShowSettings(true)} variant="ghost" size="sm">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Einstellungen
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-lg">Cookie-Einstellungen</h3>
-              <button onClick={() => setShowSettings(false)} className="p-2 hover:bg-muted rounded-lg">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
-                <div>
-                  <p className="font-medium">Notwendige Cookies</p>
-                  <p className="text-sm text-muted-foreground">Für Anmeldung und grundlegende Funktionen</p>
-                </div>
-                <div className="w-12 h-6 bg-primary/30 rounded-full flex items-center justify-end px-1">
-                  <div className="w-4 h-4 bg-primary rounded-full" />
-                </div>
-              </div>
-
-              <label className="flex items-center justify-between p-4 bg-muted/50 rounded-xl cursor-pointer hover:bg-muted transition-colors">
-                <div>
-                  <p className="font-medium">Funktionale Cookies</p>
-                  <p className="text-sm text-muted-foreground">Für erweiterte Funktionen und Einstellungen</p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={customSettings.functional}
-                  onChange={(e) => setCustomSettings(prev => ({ ...prev, functional: e.target.checked }))}
-                  className="sr-only"
-                />
-                <div className={`w-12 h-6 rounded-full flex items-center px-1 transition-colors ${
-                  customSettings.functional ? 'bg-primary/30 justify-end' : 'bg-muted justify-start'
-                }`}>
-                  <div className={`w-4 h-4 rounded-full transition-colors ${
-                    customSettings.functional ? 'bg-primary' : 'bg-foreground/30'
-                  }`} />
-                </div>
-              </label>
-
-              <label className="flex items-center justify-between p-4 bg-muted/50 rounded-xl cursor-pointer hover:bg-muted transition-colors">
-                <div>
-                  <p className="font-medium">Analyse-Cookies</p>
-                  <p className="text-sm text-muted-foreground">Zur Verbesserung unserer Dienste</p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={customSettings.analytics}
-                  onChange={(e) => setCustomSettings(prev => ({ ...prev, analytics: e.target.checked }))}
-                  className="sr-only"
-                />
-                <div className={`w-12 h-6 rounded-full flex items-center px-1 transition-colors ${
-                  customSettings.analytics ? 'bg-primary/30 justify-end' : 'bg-muted justify-start'
-                }`}>
-                  <div className={`w-4 h-4 rounded-full transition-colors ${
-                    customSettings.analytics ? 'bg-primary' : 'bg-foreground/30'
-                  }`} />
-                </div>
-              </label>
-            </div>
-
-            <div className="flex gap-3">
-              <Button onClick={handleSaveCustom} className="btn-primary flex-1">
-                Auswahl speichern
-              </Button>
-              <Button onClick={acceptAll} variant="outline" className="flex-1">
-                Alle akzeptieren
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+    <CookieConsentContext.Provider value={{
+      consent,
+      settings,
+      acceptAll,
+      acceptEssential,
+      saveCustomSettings,
+      resetConsent,
+      showBanner: consent === 'pending',
+    }}>
+      {children}
+    </CookieConsentContext.Provider>
   );
 };
 
-// Cookie Settings Link for Footer
+export const CookieBanner = () => {
+  const { consent, settings, acceptAll, acceptEssential, saveCustomSettings } = useCookieConsent();
+  const [showSettings, setShowSettings] = useState(false);
+  const [customSettings, setCustomSettings] = useState<CookieSettings>(settings);
+
+  if (consent !== 'pending') return null;
+
+  return (
+    <>
+      <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-slide-up">
+        <div className="max-w-4xl mx-auto bg-card/95 backdrop-blur-lg rounded-xl border border-border shadow-2xl p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Cookie className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg mb-2">We value your privacy</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                We use cookies to enhance your experience and analyze app usage. 
+                You can customize your preferences or accept essential cookies only.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={acceptAll} size="sm">
+                  Accept all
+                </Button>
+                <Button onClick={acceptEssential} variant="outline" size="sm">
+                  Reject non-essential
+                </Button>
+                <Button 
+                  onClick={() => setShowSettings(true)} 
+                  variant="ghost" 
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Settings className="w-4 h-4" />
+                  Cookie settings
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-primary" />
+              Cookie Settings
+            </DialogTitle>
+            <DialogDescription>
+              Customize which cookies you want to allow. Essential cookies cannot be disabled.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+              <div>
+                <p className="font-medium">Essential Cookies</p>
+                <p className="text-sm text-muted-foreground">
+                  Required for the app to function properly.
+                </p>
+              </div>
+              <Switch checked disabled />
+            </div>
+            
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+              <div>
+                <p className="font-medium">Analytics Cookies</p>
+                <p className="text-sm text-muted-foreground">
+                  Help us understand how the app is used.
+                </p>
+              </div>
+              <Switch 
+                checked={customSettings.analytics}
+                onCheckedChange={(checked) => 
+                  setCustomSettings(prev => ({ ...prev, analytics: checked }))
+                }
+              />
+            </div>
+            
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+              <div>
+                <p className="font-medium">Functional Cookies</p>
+                <p className="text-sm text-muted-foreground">
+                  Enable personalization and advanced features.
+                </p>
+              </div>
+              <Switch 
+                checked={customSettings.functional}
+                onCheckedChange={(checked) => 
+                  setCustomSettings(prev => ({ ...prev, functional: checked }))
+                }
+              />
+            </div>
+          </div>
+          
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setShowSettings(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              saveCustomSettings(customSettings);
+              setShowSettings(false);
+            }}>
+              Save preferences
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
 export const CookieSettingsButton = () => {
   const { resetConsent } = useCookieConsent();
   
   return (
     <button 
       onClick={resetConsent}
-      className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+      className="text-muted-foreground hover:text-foreground transition-colors"
     >
-      Cookie-Einstellungen
+      Cookie Settings
     </button>
   );
 };

@@ -16,28 +16,28 @@ export const Footer = () => {
               <span className="font-display font-bold text-lg">StudyQuest</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-sm">
-              Verwandle dein Lernen in sichtbaren Fortschritt. Focus-Sessions, Reflexionen, 
-              und ein Belohnungssystem, das dich motiviert hält.
+              Turn your learning into visible progress. Focus sessions, reflections, 
+              and a reward system that keeps you motivated.
             </p>
           </div>
 
           {/* Links */}
           <div>
-            <h4 className="font-semibold mb-4">Produkt</h4>
+            <h4 className="font-semibold mb-4">Product</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/demo" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Demo starten
+                  Try Demo
                 </Link>
               </li>
               <li>
                 <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Preise
+                  Pricing
                 </a>
               </li>
               <li>
                 <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Funktionen
+                  Features
                 </a>
               </li>
             </ul>
@@ -45,16 +45,16 @@ export const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h4 className="font-semibold mb-4">Rechtliches</h4>
+            <h4 className="font-semibold mb-4">Legal</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/impressum" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Impressum
+                  Legal Notice
                 </Link>
               </li>
               <li>
                 <Link to="/datenschutz" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Datenschutz
+                  Privacy Policy
                 </Link>
               </li>
               <li>
@@ -67,7 +67,7 @@ export const Footer = () => {
         {/* Bottom */}
         <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} StudyQuest. Alle Rechte vorbehalten.
+            © {new Date().getFullYear()} StudyQuest. All rights reserved.
           </p>
           <a 
             href="mailto:kokalolishamer@gmail.com" 
