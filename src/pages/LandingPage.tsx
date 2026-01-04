@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,67 +18,19 @@ import {
   Zap,
   TrendingUp,
   Calendar,
-  MessageCircle,
-  Play,
-  X,
-  Pause,
-  Volume2,
-  VolumeX
+  MessageCircle
 } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Mascot } from '@/components/Mascot';
-import demoVideo from '@/assets/demo-walkthrough.mp4';
 
 const LandingPage = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [videoOpen, setVideoOpen] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleWaitlist = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
       setSubmitted(true);
       setEmail('');
-    }
-  };
-
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const handleVideoOpen = () => {
-    setVideoOpen(true);
-    setIsPlaying(true);
-    setTimeout(() => {
-      if (videoRef.current) {
-        videoRef.current.play();
-      }
-    }, 100);
-  };
-
-  const handleVideoClose = () => {
-    setVideoOpen(false);
-    setIsPlaying(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
     }
   };
 
@@ -191,172 +143,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Demo Video Section */}
-      <section className="py-20 px-4 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[300px] bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
-        
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-primary/10 rounded-full px-4 py-2 mb-6 animate-fade-in">
-              <Play className="w-4 h-4 text-primary animate-pulse" />
-              <span className="text-sm font-medium">Guided Walkthrough</span>
-            </div>
-            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 animate-slide-up">
-              A Guided Walkthrough of the{' '}
-              <span className="text-gradient-gold">Real Demo</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.1s' }}>
-              Watch the actual app in action — every screen you see is real
-            </p>
-          </div>
-
-          {/* Video Thumbnail */}
-          <div 
-            className="relative aspect-video max-w-4xl mx-auto rounded-2xl overflow-hidden cursor-pointer group shadow-2xl border border-border/50"
-            onClick={handleVideoOpen}
-          >
-            {/* Video as thumbnail (muted, looping preview) */}
-            <video 
-              className="absolute inset-0 w-full h-full object-cover"
-              src={demoVideo}
-              muted
-              loop
-              playsInline
-              autoPlay
-            />
-            
-            {/* Overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent group-hover:opacity-50 transition-opacity" />
-
-            {/* Play Button Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative">
-                {/* Pulse ring */}
-                <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: '2s' }} />
-                
-                {/* Play button */}
-                <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                  <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground ml-1" fill="currentColor" />
-                </div>
-              </div>
-            </div>
-
-            {/* Video captions overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-center">
-              <p className="text-lg md:text-xl font-medium text-foreground">
-                See StudyQuest in action
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">Click to watch with sound</p>
-            </div>
-
-            {/* Decorative elements */}
-            <div className="absolute top-4 left-4 bg-xp-gold/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-xp-gold/30">
-              <span className="text-xs font-bold text-xp-gold">+50 XP</span>
-            </div>
-            <div className="absolute top-4 right-4 bg-progress-green/20 backdrop-blur-sm rounded-lg px-3 py-1.5 border border-progress-green/30">
-              <span className="text-xs font-medium text-progress-green flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> Level Up!
-              </span>
-            </div>
-          </div>
-
-          {/* Video Feature Highlights */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-3xl mx-auto">
-            {[
-              "Focus for 30 minutes",
-              "Reflect & remember",
-              "Level up your learning",
-              "See your progress grow"
-            ].map((caption, i) => (
-              <div 
-                key={i} 
-                className="text-center py-3 px-4 rounded-xl bg-card/50 border border-border/50 animate-fade-in"
-                style={{ animationDelay: `${i * 0.1}s` }}
-              >
-                <p className="text-sm font-medium text-muted-foreground">{caption}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA under video */}
-          <div className="text-center mt-12">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/demo">
-                <Button size="lg" className="btn-primary w-full sm:w-auto text-lg px-8 py-6 group">
-                  Try the Demo Yourself
-                  <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </Link>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6">
-                Join the Waitlist
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Video Modal */}
-        <Dialog open={videoOpen} onOpenChange={handleVideoClose}>
-          <DialogContent className="max-w-5xl w-full p-0 bg-background border-border overflow-hidden">
-            <div className="relative aspect-video bg-black">
-              {/* Actual Video Player */}
-              <video 
-                ref={videoRef}
-                className="absolute inset-0 w-full h-full object-contain"
-                src={demoVideo}
-                muted={isMuted}
-                playsInline
-                onEnded={() => setIsPlaying(false)}
-              />
-              
-              {/* Video Controls Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                <button 
-                  onClick={togglePlay}
-                  className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                >
-                  {isPlaying ? (
-                    <Pause className="w-7 h-7 text-primary-foreground" fill="currentColor" />
-                  ) : (
-                    <Play className="w-7 h-7 text-primary-foreground ml-1" fill="currentColor" />
-                  )}
-                </button>
-              </div>
-              
-              {/* Bottom Controls */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                <div className="flex items-center justify-between">
-                  <button 
-                    onClick={toggleMute}
-                    className="w-10 h-10 rounded-full bg-background/20 backdrop-blur-sm flex items-center justify-center hover:bg-background/40 transition-colors"
-                  >
-                    {isMuted ? (
-                      <VolumeX className="w-5 h-5 text-white" />
-                    ) : (
-                      <Volume2 className="w-5 h-5 text-white" />
-                    )}
-                  </button>
-                  
-                  <Link to="/demo" onClick={handleVideoClose}>
-                    <Button size="sm" className="btn-primary">
-                      Try Demo Now
-                      <ChevronRight className="ml-1 w-4 h-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-              
-              {/* Close button */}
-              <button 
-                onClick={handleVideoClose}
-                className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </section>
 
       {/* Problem Section */}
       <section className="py-20 px-4 bg-muted/30 relative overflow-hidden">
