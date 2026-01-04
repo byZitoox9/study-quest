@@ -3,6 +3,8 @@ import { AVATAR_LEVELS } from '@/types/game';
 import type { PlayerStats, WeeklyGoal, Achievement } from '@/types/game';
 import { WeeklyGoals } from './WeeklyGoals';
 import { LearningReminders } from './LearningReminders';
+import { useAuth } from '@/contexts/AuthContext';
+import { Crown, Sparkles } from 'lucide-react';
 
 interface DashboardProps {
   stats: PlayerStats;
@@ -15,6 +17,7 @@ interface DashboardProps {
   onViewSocial: () => void;
   onViewAchievements: () => void;
   onGoalComplete: (goalId: string) => void;
+  onViewUpgrade?: () => void;
   reduceAnimations?: boolean;
 }
 
@@ -29,9 +32,11 @@ export const Dashboard = ({
   onViewSocial,
   onViewAchievements,
   onGoalComplete,
+  onViewUpgrade,
   reduceAnimations
 }: DashboardProps) => {
   const [showReminder, setShowReminder] = useState(true);
+  const { isPremium, isLoggedIn, isGuest } = useAuth();
   const currentLevelData = AVATAR_LEVELS.find(l => l.level === stats.avatarLevel);
   const recentBook = stats.books.find(b => b.sessionsCompleted > 0) || stats.books[0];
   const unlockedAchievements = achievements.filter(a => a.unlocked).length;
@@ -170,10 +175,43 @@ export const Dashboard = ({
         </span>
       </div>
 
-      {/* Demo Note */}
-      <p className="text-xs text-center text-muted-foreground">
-        Demo mode • Progress resets on refresh
-      </p>
+      {/* Premium Upgrade CTA - show for logged-in non-premium users */}
+      {isLoggedIn && !isPremium && onViewUpgrade && (
+        <button
+          onClick={onViewUpgrade}
+          className="w-full p-4 rounded-xl bg-gradient-to-r from-xp-gold/20 to-yellow-600/20 border border-xp-gold/30 hover:border-xp-gold/50 transition-colors group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-xp-gold to-yellow-600 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-background" />
+              </div>
+              <div className="text-left">
+                <p className="font-semibold text-xp-gold">Unlock Premium</p>
+                <p className="text-xs text-muted-foreground">$4.99 • Lifetime access</p>
+              </div>
+            </div>
+            <Sparkles className="w-5 h-5 text-xp-gold group-hover:animate-pulse" />
+          </div>
+        </button>
+      )}
+
+      {/* Demo Note - only show for guests */}
+      {isGuest && (
+        <p className="text-xs text-center text-muted-foreground">
+          Demo mode • Sign in to save progress
+        </p>
+      )}
+
+      {/* Premium badge for premium users */}
+      {isPremium && (
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-xp-gold/20 border border-xp-gold/30">
+            <Crown className="w-4 h-4 text-xp-gold" />
+            <span className="font-medium text-xp-gold text-sm">Premium Member</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +30,12 @@ interface UserProgress {
   settings: any;
 }
 
+interface PurchaseStatus {
+  isPremium: boolean;
+  hasLifetimeAccess: boolean;
+  purchaseDate: string | null;
+}
+
 interface AuthState {
   user: User | null;
   session: Session | null;
@@ -38,6 +44,8 @@ interface AuthState {
   isGuest: boolean;
   isLoggedIn: boolean;
   isPremium: boolean;
+  hasLifetimeAccess: boolean;
+  purchaseDate: string | null;
   creditsRemaining: number;
   isLoading: boolean;
 }
@@ -52,6 +60,8 @@ interface AuthContextType extends AuthState {
   refreshProfile: () => Promise<void>;
   saveProgress: (progress: any) => Promise<void>;
   loadProgress: () => Promise<UserProgress | null>;
+  checkPurchaseStatus: () => Promise<PurchaseStatus | null>;
+  setPremiumStatus: (isPremium: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -74,6 +84,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [purchaseStatus, setPurchaseStatus] = useState<PurchaseStatus>({
+    isPremium: false,
+    hasLifetimeAccess: false,
+    purchaseDate: null,
+  });
   const { toast } = useToast();
 
   const fetchProfile = async (userId: string) => {
@@ -102,6 +117,50 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return null;
     }
     return data as UserProgress | null;
+  };
+
+  const checkPurchaseStatus = useCallback(async (): Promise<PurchaseStatus | null> => {
+    if (!session?.access_token) return null;
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-purchase', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error checking purchase:', error);
+        return null;
+      }
+
+      const status: PurchaseStatus = {
+        isPremium: data?.isPremium ?? false,
+        hasLifetimeAccess: data?.hasLifetimeAccess ?? false,
+        purchaseDate: data?.purchaseDate ?? null,
+      };
+
+      setPurchaseStatus(status);
+
+      // Update profile if premium
+      if (status.isPremium && profile && !profile.is_premium) {
+        setProfile(prev => prev ? { ...prev, is_premium: true, credits_remaining: 9999 } : null);
+      }
+
+      return status;
+    } catch (error) {
+      console.error('Error checking purchase status:', error);
+      return null;
+    }
+  }, [session?.access_token, profile]);
+
+  const setPremiumStatus = (isPremium: boolean) => {
+    setPurchaseStatus(prev => ({
+      ...prev,
+      isPremium,
+      hasLifetimeAccess: isPremium,
+    }));
+    setProfile(prev => prev ? { ...prev, is_premium: isPremium, credits_remaining: 9999 } : null);
   };
 
   const refreshProfile = async () => {
@@ -146,6 +205,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Check purchase status when session changes
+  useEffect(() => {
+    if (session?.access_token) {
+      checkPurchaseStatus();
+    }
+  }, [session?.access_token]);
 
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -212,6 +278,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     await supabase.auth.signOut();
     setProfile(null);
     setUserProgress(null);
+    setPurchaseStatus({
+      isPremium: false,
+      hasLifetimeAccess: false,
+      purchaseDate: null,
+    });
     toast({
       title: 'Signed out',
       description: 'See you next time!',
@@ -219,6 +290,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const useCredit = async (): Promise<boolean> => {
+    // Premium users have unlimited credits
+    if (purchaseStatus.isPremium || profile?.is_premium) {
+      return true;
+    }
+
     if (!user || !profile) return false;
     
     if (profile.credits_remaining <= 0) {
@@ -267,7 +343,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (error) {
       console.error('Error saving progress:', error);
     } else {
-      // Update local state
       const newProgress = await fetchUserProgress(user.id);
       setUserProgress(newProgress);
     }
@@ -286,7 +361,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const existingProgress = await fetchUserProgress(user.id);
 
     if (!existingProgress || existingProgress.total_sessions === 0) {
-      // User has no progress, merge guest data
       await saveProgress(guestProgress);
       
       toast({
@@ -298,8 +372,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const isGuest = !user;
   const isLoggedIn = !!user;
-  const isPremium = profile?.is_premium ?? false;
-  const creditsRemaining = profile?.credits_remaining ?? 2;
+  const isPremium = purchaseStatus.isPremium || (profile?.is_premium ?? false);
+  const creditsRemaining = isPremium ? 9999 : (profile?.credits_remaining ?? 2);
 
   return (
     <AuthContext.Provider
@@ -311,6 +385,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isGuest,
         isLoggedIn,
         isPremium,
+        hasLifetimeAccess: purchaseStatus.hasLifetimeAccess,
+        purchaseDate: purchaseStatus.purchaseDate,
         creditsRemaining,
         isLoading,
         signInWithGoogle,
@@ -322,6 +398,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         refreshProfile,
         saveProgress,
         loadProgress,
+        checkPurchaseStatus,
+        setPremiumStatus,
       }}
     >
       {children}
