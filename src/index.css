@@ -230,6 +230,13 @@
     background-clip: text;
   }
 
+  .text-gradient-gold {
+    background: var(--gradient-xp);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
